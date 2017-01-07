@@ -1,16 +1,12 @@
-#ifndef ROBOT_H__INCLUDED
+#ifndef ROBOT_H__INCLUDED	//Make sure this isn't included twice
 #define ROBOT_H__INCLUDED
-
 
 #include "WPILib.h"
 #include "NetworkTables/NetworkTable.h"
 #include "Drive.h"
-#include "Catapult.h"
-#include "Lift.h"
 #include "LED.h"
 
-
-class Robot: public SampleRobot{
+class Robot: public SampleRobot {
 public:
 	Robot(void);
 	~Robot(void);
@@ -23,19 +19,16 @@ public:
 private:
 	void ToggleBool(bool, bool&, bool&);
 
-	Joystick* oJoystick; // Appending "o" to avoid naming conflicts ("o" for object)
-	LED* oLED;
-	Drive* oDrive;
-	Catapult* oCatapult;
-	Lift* oLift;
+	Joystick *oJoystick;	//Prepending "o" to avoid naming conflicts ("o" for object)
+	LED *oLED;
+	Drive *oDrive;
 
-	// For vision tracking
+	//For vision tracking
 	USBCamera *oUSBCameraFront;
 	USBCamera *oUSBCameraBack;
 	Image *oImage;
-	NetworkTable* oNetworkTable;
-
+	NetworkTable *oNetworkTable;
+	
 };
-
 
 #endif /* ROBOT_H__INCLUDED */
