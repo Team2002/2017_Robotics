@@ -7,9 +7,9 @@ const int PORT_JOYSTICK = 0; // Joysticks
 
 // PWM Ports
 const int PORT_TALON_DRIVE_FRONTLEFT = 0; // Talons (Motor Controllers)
-const int PORT_TALON_DRIVE_FRONTRIGHT = 2;
-const int PORT_TALON_DRIVE_BACKLEFT = 1;
-const int PORT_TALON_DRIVE_BACKRIGHT = 3;
+const int PORT_TALON_DRIVE_FRONTRIGHT = 3;
+const int PORT_TALON_DRIVE_BACKLEFT = 2;
+const int PORT_TALON_DRIVE_BACKRIGHT = 5;
 const int PORT_TALON_LIFT_LEFT_UP = -1;
 const int PORT_TALON_LIFT_RIGHT_UP = -1;
 const int PORT_TALON_LIFT_LEFT_DOWN = -1;
@@ -89,7 +89,7 @@ const float VOLTAGE_1 = 11; // Two points for creating the line that calculates 
 const float SPEED_1 = 0.5;
 const float VOLTAGE_2 = 13;
 const float SPEED_2 = 0.3;
-
+const float SLOPE = (SPEED_2 - SPEED_1) / (VOLTAGE_2 - VOLTAGE_1);
 
 // Other
 const float CYCLE_TIME_DELAY = 0.02; // Time to wait between each update cycle in tele-op (to prevent needless CPU usage)

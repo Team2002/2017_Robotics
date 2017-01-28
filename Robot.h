@@ -2,9 +2,11 @@
 #define ROBOT_H__INCLUDED
 
 #include "WPILib.h"
+#include "opencv2/core/core.hpp"
 #include "NetworkTables/NetworkTable.h"
 #include "Drive.h"
 #include "LED.h"
+//#include "USBCamera.cpp"
 
 class Robot: public SampleRobot {
 public:
@@ -23,12 +25,14 @@ private:
 	LED *oLED;
 	Drive *oDrive;
 
+	Preferences *oPrefs;
+	int autonomousMode;
+
 	//For vision tracking
-	USBCamera *oUSBCameraFront;
-	USBCamera *oUSBCameraBack;
-	Image *oImage;
+	cs::UsbCamera *oUSBCamera;
+	//USBCamera *oUSBCameraBack;
+	//Image *oImage;
 	NetworkTable *oNetworkTable;
-	
 };
 
 #endif /* ROBOT_H__INCLUDED */
