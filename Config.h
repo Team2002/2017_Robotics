@@ -1,7 +1,6 @@
 #ifndef CONFIG_H__INCLUDED
 #define CONFIG_H__INCLUDED
 
-
 // Driver Station Ports
 const int PORT_JOYSTICK = 0; // Joysticks
 
@@ -32,7 +31,6 @@ const int PORT_RELAY_RED = 0; // Spike H-Bridge Relays (for LEDs)
 const int PORT_RELAY_GREEN = 1;
 const int PORT_RELAY_BLUE = 2;
 
-
 // Motor Reversal
 const bool DRIVE_MOTOR_FRONTLEFT_REVERSED = false; // Drive
 const bool DRIVE_MOTOR_FRONTRIGHT_REVERSED = true;
@@ -46,7 +44,6 @@ const bool LIFT_MOTOR_RIGHT_DOWN_REVERSED = true;
 
 const bool INTAKE_MOTOR_REVERSED = true; // Catapult
 const bool LAUNCH_MOTOR_REVERSED = true;
-
 
 // Joystick Setup
 const int JOYSTICK_AXIS_LEFT = 1; // Axes
@@ -65,21 +62,16 @@ const int JOYSTICK_BUTTON_LIFT_UP = -1;
 const int JOYSTICK_BUTTON_LIFT_DOWN = -1;
 const int JOYSTICK_BUTTON_LIFT_TOGGLE = -1;
 
-
 // Catapult
 const float INTAKE_MOTOR_SPEED = 1; // Speed to run intake motor when intaking boulders
 const float LAUNCH_MOTOR_SPEED = 1; // Speed to run the launcher motor when charging
 
-
 // Camera Settings
-const char CAMERA_NAME_FRONT[] = "cam0\0"; // Found in RoboRio web interface
-const char CAMERA_NAME_BACK[] = "cam1\0";
+const char CAMERA_NAME[] = "cam0\0"; // Found in RoboRio web interface
 const int CAMERA_RES_X = 640;
 const int CAMERA_RES_Y = 480;
 const int CAMERA_FPS = 10;
-const unsigned int CAMERA_0_EXPOSURE = 0;
-const unsigned int CAMERA_1_BRIGHTNESS = 50;
-
+const unsigned int CAMERA_EXPOSURE = 0;
 
 // Target Tracking
 const int TARGET_X = 295; // Target x coordinate
@@ -93,6 +85,5 @@ const float SLOPE = (SPEED_2 - SPEED_1) / (VOLTAGE_2 - VOLTAGE_1);
 
 // Other
 const float CYCLE_TIME_DELAY = 0.02; // Time to wait between each update cycle in tele-op (to prevent needless CPU usage)
-
 
 #endif /* CONFIG_H__INCLUDED */

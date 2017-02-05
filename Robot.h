@@ -1,12 +1,10 @@
-#ifndef ROBOT_H__INCLUDED	//Make sure this isn't included twice
+#ifndef ROBOT_H__INCLUDED
 #define ROBOT_H__INCLUDED
 
 #include "WPILib.h"
-#include "opencv2/core/core.hpp"
 #include "NetworkTables/NetworkTable.h"
 #include "Drive.h"
 #include "LED.h"
-//#include "USBCamera.cpp"
 
 class Robot: public SampleRobot {
 public:
@@ -20,8 +18,8 @@ public:
 
 private:
 	void ToggleBool(bool, bool&, bool&);
-
-	Joystick *oJoystick;	//Prepending "o" to avoid naming conflicts ("o" for object)
+	static void VisionThread();
+	Joystick *oJoystick; //Prepending "o" to avoid naming conflicts ("o" for object)
 	LED *oLED;
 	Drive *oDrive;
 
@@ -29,8 +27,8 @@ private:
 	int autonomousMode;
 
 	//For vision tracking
-	cs::UsbCamera *oUSBCamera;
-	//USBCamera *oUSBCameraBack;
+	//cs::UsbCamera *oUSBCamera;
+	//USBCamera *oUSBCamera;
 	//Image *oImage;
 	NetworkTable *oNetworkTable;
 };

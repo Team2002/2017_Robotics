@@ -10,9 +10,6 @@ Robot::Robot(void) {
 	oPrefs = nullptr;
 	autonomousMode = 0;
 
-	oUSBCamera = new cs::UsbCamera(CAMERA_NAME_FRONT, 0);
-	//oUSBCameraBack = new USBCamera(CAMERA_NAME_BACK, true);
-	//oImage = imaqCreateImage(IMAQ_IMAGE_RGB, 0);
 	oNetworkTable = &*NetworkTable::GetTable("datatable"); // GetTable returns a shared pointer, so referencing and dereferencing converts it to a raw pointer
 }
 
@@ -22,9 +19,6 @@ Robot::~Robot(void) {
 	delete oLED;
 	delete oDrive;
 	
-	//delete oUSBCameraFront;
-	//delete oUSBCameraBack;
-	//delete oImage;
 	delete oNetworkTable;
 }
 
@@ -45,16 +39,16 @@ void Robot::RobotInit(void) {
 	 }*/
 
 	// Camera settings
-	//oUSBCameraFront->SetFPS(CAMERA_FPS);
-	//oUSBCameraFront->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
+	//oUSBCamera->SetFPS(CAMERA_FPS);
+	//oUSBCamera->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
 	//oUSBCameraFront->SetExposureManual(CAMERA_0_EXPOSURE);
 	//oUSBCameraFront->UpdateSettings();
-	
 	//oUSBCameraBack->SetFPS(CAMERA_FPS);
 	//oUSBCameraBack->SetSize(CAMERA_RES_X, CAMERA_RES_Y);
 	//oUSBCameraBack->SetBrightness(CAMERA_1_BRIGHTNESS);
 	//oUSBCameraBack->SetExposureAuto();
 	//oUSBCameraBack->UpdateSettings();
+	CameraServer::GetInstance()->StartAutomaticCapture();
 
 	//Load preferences
 	oPrefs = Preferences::GetInstance();
@@ -72,32 +66,45 @@ void Robot::Test(void) {
 
 //Autonomous mode
 void Robot::Autonomous(void) {
-	oDrive->SetMotors(1, 1);
-	Wait(3.5);
-	oDrive->SetMotors(0, 0);
+	bool failed = false;
+	switch(autonomousMode) {
+		case 1:		//Left
+			//move forward
+			//turn right
+			//find lift
+			break;
+
+		case 2:		//Middle
+			//move forward
+			//find lift
+			break;
+
+		case 3:		//Right
+			//move forward
+			//turn left
+			//find lift
+			break;
+
+		default:	//Nonsense value
+			SmartDashboard::PutNumber("Error: ", autonomousMode);
+			failed = true;
+			break;
+	}
+	if(!failed) {
+		//line up to lift
+		//put gear on
+	}
 }
 
 //Tele-op
 void Robot::OperatorControl(void) {
-	float speedLeft, speedRight,		// Drive motor speeds for manual control
-		speedLeftTemp;					// Temporarily used for reversing drive motor speeds
-	//bool firingCatapult = false;		// Needed to prevent robot from moving while auto shooting the boulder
-	bool reversed = false,				// Keeps track of robot being in reverse mode
+	float speedLeft, speedRight;		// Drive motor speeds for manual control
+	bool reversed = false,		// Keeps track of robot being in reverse mode
 		reverseButtonPressed = false;	// Needed for toggling reverse mode
-	int camera = 0;						// Keeps track of which camera is currently in use (0 = front, 1 = back)
-	std::vector<double> coord;			// Target coordinates sent from RoboRealm
-	cs::CvSink in = CameraServer::GetInstance()->GetVideo();
-	cs::CvSource out = CameraServer::GetInstance()->PutVideo(CAMERA_NAME_FRONT, CAMERA_RES_X, CAMERA_RES_Y);
-	cv::Mat image;
-	CameraServer::GetInstance()->StartAutomaticCapture();
-	// Start camera
-	//oUSBCamera->StartAutomaticCapture();
-	//oUSBCameraBack->StartCapture();
+	std::vector<double> coord;		// Target coordinates sent from RoboRealm
 	
 	// Continue updating robot while in tele-op mode
 	while(IsOperatorControl() && IsEnabled()) {
-		//in.GrabFrame(image);
-		//out.PutFrame(image);
 		
 		// For camera calibrating, sends target data to smart dashboarad
 		coord = oNetworkTable->GetNumberArray("BLOBS", std::vector<double>());
@@ -107,7 +114,7 @@ void Robot::OperatorControl(void) {
 		}
 		
 		// Autonomous target tracking
-		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET) /*&& !firingCatapult*/&& camera == 0) {
+		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
 			
 			// Calculate drive motor speed based on battery voltage
 			float voltage = DriverStation::GetInstance().GetBatteryVoltage();
@@ -138,9 +145,8 @@ void Robot::OperatorControl(void) {
 						// Robot is on target, stop robot and make sure it is still on target
 						oDrive->StopMotors(); // Stop motors
 						Wait(0.5); // Wait for robot to stop moving
-						if(coord[0] >= TARGET_X - (CENTERED_THRESHOLD * CAMERA_RES_X) && coord[0] <= TARGET_X + (CENTERED_THRESHOLD * CAMERA_RES_X) && coord[1] >= TARGET_Y - (CENTERED_THRESHOLD * CAMERA_RES_Y) && coord[1] <= TARGET_Y + (CENTERED_THRESHOLD * CAMERA_RES_Y)) {
-							//oCatapult->SetLaunchState(Catapult::FIRE); // Fire boulder
-							//firingCatapult = true; // Prevents robot from trying to re-adjust while firing the boulder
+						if(abs(coord[0] - TARGET_X) < (CENTERED_THRESHOLD * CAMERA_RES_X) && abs(coord[1] - TARGET_Y) < (CENTERED_THRESHOLD * CAMERA_RES_Y)) {
+							//put gear on
 						}
 					}
 				}
@@ -153,16 +159,10 @@ void Robot::OperatorControl(void) {
 		}
 
 		// Manual driver control
-		else if(!oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
+		else {
 			
 			// Reset auto target tracking variable
 			//firingCatapult = false;
-			
-			// Camera toggling
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_CAMERA_TOGGLE))
-				camera = 1;
-			else
-				camera = 0;
 			
 			// Get joystick values (negated because the stupid driver station reads them that way)
 			speedLeft = -oJoystick->GetRawAxis(JOYSTICK_AXIS_LEFT);
@@ -175,7 +175,7 @@ void Robot::OperatorControl(void) {
 			// Reverse mode toggling
 			ToggleBool(oJoystick->GetRawButton(JOYSTICK_BUTTON_REVERSE), reverseButtonPressed, reversed);
 			if(reversed) {
-				speedLeftTemp = speedLeft;
+				float speedLeftTemp = speedLeft;
 				speedLeft = -speedRight;
 				speedRight = -speedLeftTemp;
 			}
@@ -187,7 +187,7 @@ void Robot::OperatorControl(void) {
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_DOWN))
 				; //oCatapult->SetIntakeState(Catapult::DOWN);
 			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_UP))
-				oDrive->SetMotors(1,1); //oCatapult->SetIntakeState(Catapult::UP);
+				oDrive->SetMotors(1, 1); //oCatapult->SetIntakeState(Catapult::UP);
 				
 			// Boulder intake wheels
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD))
