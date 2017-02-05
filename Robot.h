@@ -1,4 +1,4 @@
-#ifndef ROBOT_H__INCLUDED	//Make sure this isn't included twice
+#ifndef ROBOT_H__INCLUDED
 #define ROBOT_H__INCLUDED
 
 #include "WPILib.h"
@@ -18,17 +18,19 @@ public:
 
 private:
 	void ToggleBool(bool, bool&, bool&);
-
-	Joystick *oJoystick;	//Prepending "o" to avoid naming conflicts ("o" for object)
+	static void VisionThread();
+	Joystick *oJoystick; //Prepending "o" to avoid naming conflicts ("o" for object)
 	LED *oLED;
 	Drive *oDrive;
 
+	Preferences *oPrefs;
+	int autonomousMode;
+
 	//For vision tracking
-	USBCamera *oUSBCameraFront;
-	USBCamera *oUSBCameraBack;
-	Image *oImage;
+	//cs::UsbCamera *oUSBCamera;
+	//USBCamera *oUSBCamera;
+	//Image *oImage;
 	NetworkTable *oNetworkTable;
-	
 };
 
 #endif /* ROBOT_H__INCLUDED */
