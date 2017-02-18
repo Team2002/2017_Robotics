@@ -7,9 +7,12 @@ Robot::Robot(void) {
 	oLED = new LED();
 	oDrive = new Drive();
 	
-	oUSBCameraFront = new USBCamera(CAMERA_NAME_FRONT, true);
-	oUSBCameraBack = new USBCamera(CAMERA_NAME_BACK, true);
-	oImage = imaqCreateImage(IMAQ_IMAGE_RGB, 0);
+	oPrefs = nullptr;
+	autonomousMode = 0;
+
+	oUSBCamera = new cs::UsbCamera(CAMERA_NAME_FRONT, 0);
+	//oUSBCameraBack = new USBCamera(CAMERA_NAME_BACK, true);
+	//oImage = imaqCreateImage(IMAQ_IMAGE_RGB, 0);
 	oNetworkTable = &*NetworkTable::GetTable("datatable"); // GetTable returns a shared pointer, so referencing and dereferencing converts it to a raw pointer
 }
 
@@ -19,9 +22,9 @@ Robot::~Robot(void) {
 	delete oLED;
 	delete oDrive;
 	
-	delete oUSBCameraFront;
-	delete oUSBCameraBack;
-	delete oImage;
+	//delete oUSBCameraFront;
+	//delete oUSBCameraBack;
+	//delete oImage;
 	delete oNetworkTable;
 }
 
@@ -42,28 +45,30 @@ void Robot::RobotInit(void) {
 	 }*/
 
 	// Camera settings
-	oUSBCameraFront->SetFPS(CAMERA_FPS);
-	oUSBCameraFront->SetSize(CAMERA_RES_X, CAMERA_RES_Y);
-	oUSBCameraFront->SetExposureManual(CAMERA_0_EXPOSURE);
-	oUSBCameraFront->UpdateSettings();
+	//oUSBCameraFront->SetFPS(CAMERA_FPS);
+	//oUSBCameraFront->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
+	//oUSBCameraFront->SetExposureManual(CAMERA_0_EXPOSURE);
+	//oUSBCameraFront->UpdateSettings();
 	
-	oUSBCameraBack->SetFPS(CAMERA_FPS);
-	oUSBCameraBack->SetSize(CAMERA_RES_X, CAMERA_RES_Y);
-	oUSBCameraBack->SetBrightness(CAMERA_1_BRIGHTNESS);
-	oUSBCameraBack->SetExposureAuto();
-	oUSBCameraBack->UpdateSettings();
+	//oUSBCameraBack->SetFPS(CAMERA_FPS);
+	//oUSBCameraBack->SetSize(CAMERA_RES_X, CAMERA_RES_Y);
+	//oUSBCameraBack->SetBrightness(CAMERA_1_BRIGHTNESS);
+	//oUSBCameraBack->SetExposureAuto();
+	//oUSBCameraBack->UpdateSettings();
+
+	//Load preferences
+	oPrefs = Preferences::GetInstance();
+	autonomousMode = oPrefs->GetInt("Autonomous", 0);
 }
 
-/*
- // Use Test mode to charge the catapult
- void Robot::Test(void){ 
- oCatapult->SetCharging();
- while(IsTest() && IsEnabled()){
- oCatapult->CheckCatapult();
- Wait(CYCLE_TIME_DELAY);
- }
- }
- */
+// Use Test mode to charge the catapult
+void Robot::Test(void) {
+	/*oCatapult->SetCharging();
+	 while(IsTest() && IsEnabled()){
+	 oCatapult->CheckCatapult();
+	 Wait(CYCLE_TIME_DELAY);
+	 }*/
+}
 
 //Autonomous mode
 void Robot::Autonomous(void) {
@@ -81,25 +86,18 @@ void Robot::OperatorControl(void) {
 		reverseButtonPressed = false;	// Needed for toggling reverse mode
 	int camera = 0;						// Keeps track of which camera is currently in use (0 = front, 1 = back)
 	std::vector<double> coord;			// Target coordinates sent from RoboRealm
-	
+	cs::CvSink in = CameraServer::GetInstance()->GetVideo();
+	cs::CvSource out = CameraServer::GetInstance()->PutVideo(CAMERA_NAME_FRONT, CAMERA_RES_X, CAMERA_RES_Y);
+	cv::Mat image;
+	CameraServer::GetInstance()->StartAutomaticCapture();
 	// Start camera
-	oUSBCameraFront->StartCapture();
-	oUSBCameraBack->StartCapture();
+	//oUSBCamera->StartAutomaticCapture();
+	//oUSBCameraBack->StartCapture();
 	
 	// Continue updating robot while in tele-op mode
 	while(IsOperatorControl() && IsEnabled()) {
-		
-		// Get image and send to camera server
-		switch(camera) {
-			case 0:
-				oUSBCameraFront->GetImage(oImage);
-				break;
-				
-			case 1:
-				oUSBCameraBack->GetImage(oImage);
-				break;
-		}
-		CameraServer::GetInstance()->SetImage(oImage);
+		//in.GrabFrame(image);
+		//out.PutFrame(image);
 		
 		// For camera calibrating, sends target data to smart dashboarad
 		coord = oNetworkTable->GetNumberArray("BLOBS", std::vector<double>());
@@ -109,12 +107,11 @@ void Robot::OperatorControl(void) {
 		}
 		
 		// Autonomous target tracking
-		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET) /*&& !firingCatapult*/ && camera == 0) {
+		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET) /*&& !firingCatapult*/&& camera == 0) {
 			
 			// Calculate drive motor speed based on battery voltage
 			float voltage = DriverStation::GetInstance().GetBatteryVoltage();
-			float slope = (SPEED_2 - SPEED_1) / (VOLTAGE_2 - VOLTAGE_1);
-			float speed = slope * voltage + (SPEED_1 - (slope * VOLTAGE_1));
+			float speed = SLOPE * voltage + (SPEED_1 - (SLOPE * VOLTAGE_1));
 			SmartDashboard::PutNumber("VOLTAGE: ", voltage);
 			SmartDashboard::PutNumber("SPEED: ", speed);
 			
@@ -156,16 +153,16 @@ void Robot::OperatorControl(void) {
 		}
 
 		// Manual driver control
-		else if(!oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
+		//else if(!oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
 			
 			// Reset auto target tracking variable
 			//firingCatapult = false;
 			
 			// Camera toggling
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_CAMERA_TOGGLE))
-				camera = 1;
-			else
-				camera = 0;
+			//if(oJoystick->GetRawButton(JOYSTICK_BUTTON_CAMERA_TOGGLE))
+			//	camera = 1;
+			//else
+			//	camera = 0;
 			
 			// Get joystick values (negated because the stupid driver station reads them that way)
 			speedLeft = -oJoystick->GetRawAxis(JOYSTICK_AXIS_LEFT);
@@ -187,21 +184,21 @@ void Robot::OperatorControl(void) {
 			oDrive->SetMotors(speedLeft, speedRight);
 			
 			// Boulder intake piston
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_DOWN))
+			//if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_DOWN))
 				; //oCatapult->SetIntakeState(Catapult::DOWN);
-			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_UP))
-				; //oCatapult->SetIntakeState(Catapult::UP);
+			//else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_UP))
+				oDrive->SetMotors(1,1); //oCatapult->SetIntakeState(Catapult::UP);
 				
 			// Boulder intake wheels
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD))
+			//if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD))
 				; //oCatapult->ForceIntakeWheels(Catapult::FORWARD);
-			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_BACK))
+			//else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_BACK))
 				; //oCatapult->ForceIntakeWheels(Catapult::BACK);
-			else
+			//else
 				; //oCatapult->ForceIntakeWheels(Catapult::OFF);
 				
 			// Fire boulder
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FIRE_BOULDER))
+			//if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FIRE_BOULDER))
 				; //oCatapult->SetLaunchState(Catapult::FIRE);
 		}
 		
@@ -209,15 +206,15 @@ void Robot::OperatorControl(void) {
 		//oCatapult->CheckCatapult();
 		
 		// Wait until next cycle (to prevent needless CPU usage)
-		Wait (CYCLE_TIME_DELAY);
+		Wait(CYCLE_TIME_DELAY);
 	}
 	
 	// Stop drive motors
 	oDrive->StopMotors();
 	
 	// Stop camera
-	oUSBCameraFront->StopCapture();
-	oUSBCameraBack->StopCapture();
+	//oUSBCameraFront->StopCapture();
+	//oUSBCameraBack->StopCapture();
 }
 
 /*
@@ -234,4 +231,4 @@ void Robot::ToggleBool(bool button, bool &buttonPressed, bool &toggleBool) {
 		buttonPressed = false;
 }
 
-START_ROBOT_CLASS (Robot);
+START_ROBOT_CLASS(Robot);
