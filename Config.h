@@ -33,9 +33,6 @@ const bool DRIVE_MOTOR_FRONTLEFT_REVERSED = false; // Drive
 const bool DRIVE_MOTOR_FRONTRIGHT_REVERSED = true;
 const bool DRIVE_MOTOR_BACKLEFT_REVERSED = false;
 const bool DRIVE_MOTOR_BACKRIGHT_REVERSED = true;
-const bool DRIVE_MOTOR_LIFT_UP = true;
-const bool DRIVE_MOTOR_LIFT_STOP = true;
-const bool DRIVE_MOTOR_LIFT_FINAL_STOP = true;
 
 const bool LIFT_MOTOR_LEFT_UP_REVERSED = false; // Lift
 const bool LIFT_MOTOR_RIGHT_UP_REVERSED = true;
@@ -56,6 +53,11 @@ const int JOYSTICK_BUTTON_TRACK_TARGET = 5;
 const int JOYSTICK_BUTTON_RELEASE_FUEL = 3;
 const int JOYSTICK_BUTTON_INTAKE = 1;
 const int SPEED_MOTOR_MULTIPLIER = 2;
+
+// New Joystick Buttons that Are Not Correct Yet
+const int JOYSTICK_BUTTON_LIFT_UP = 7;
+const int JOYSTICK_BUTTON_SLOW_ASCENT = 8;
+
 //const int JOYSTICK_BUTTON_INTAKE_DOWN = 2;
 //const int JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD = 9;
 //const int JOYSTICK_BUTTON_FORCE_INTAKE_BACK = 10;

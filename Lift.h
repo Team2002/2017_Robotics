@@ -8,8 +8,8 @@ public:
 	Lift(void);
 	~Lift(void);
 
-	void SetMotorsLift(float);
-	void StopMotorsLift(void);
+	void SetMotorsLift(void);
+	void SlowMotorsLift(void);
 
 private:
 	const float SPEED_MOTOR_MULTIPLIER = 0.75;

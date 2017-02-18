@@ -25,6 +25,7 @@ private:
 	Joystick *oJoystick;	//Prepending "o" to avoid naming conflicts ("o" for object)
 	LED *oLED;
 	Drive *oDrive;
+	Lift *oLift;
 
 	Preferences *oPrefs;
 	int autonomousMode;

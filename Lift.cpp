@@ -12,26 +12,13 @@ Lift::~Lift(void) {
 }
 
 //Set motor speed
-void Lift::SetMotorsLift(float liftButton) {
-	liftButton *= SPEED_MOTOR_MULTIPLIER;
-
-	if(DRIVE_MOTOR_LIFT_UP) //change variable (make button start)
-		oClimbMotor->Set(liftButton);
-	else
-		oClimbMotor->Set(0);
-
-	if(DRIVE_MOTOR_LIFT_STOP) //change variable (make button stop)
-		oClimbMotor->Set(0);
-	else
-		oClimbMotor->Set(liftButton);
-	if(DRIVE_MOTOR_LIFT_FINAL_STOP) //change variable (make button stop for the final)
-		oClimbMotor->Set((liftButton/(4)));
-	else
-		oClimbMotor->Set(liftButton);
+void Lift::SetMotorsLift(void) {
+	oClimbMotor->Set(1); // may change the speed of this later
 }
 
 //Stop the motors
-void Lift::StopMotorsLift(void) {
-	oClimbMotor->Set(0);
+void Lift::SlowMotorsLift(void) {
+	oClimbMotor->Set(.5);
+	Wait(1);
+	oClimbMotor->Set(.25);
 }
-

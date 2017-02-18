@@ -6,6 +6,7 @@ Robot::Robot(void) {
 	oJoystick = new Joystick(PORT_JOYSTICK);
 	oLED = new LED();
 	oDrive = new Drive();
+	oLift = new Lift();
 	
 	oPrefs = nullptr;
 	autonomousMode = 0;
@@ -153,7 +154,7 @@ void Robot::OperatorControl(void) {
 		}
 
 		// Manual driver control
-		//else if(!oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
+		else if(!oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
 			
 			// Reset auto target tracking variable
 			//firingCatapult = false;
@@ -183,6 +184,12 @@ void Robot::OperatorControl(void) {
 			// Set drive motors
 			oDrive->SetMotors(speedLeft, speedRight);
 			
+			// Robot Lift Mechanism
+			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_LIFT_UP))
+				oLift->SetMotorsLift();
+			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_SLOW_ASCENT))
+				oLift->SlowMotorsLift();
+
 			// Boulder intake piston
 			//if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_DOWN))
 				; //oCatapult->SetIntakeState(Catapult::DOWN);
