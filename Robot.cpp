@@ -10,9 +10,8 @@ Robot::Robot(void) {
 	
 	oPrefs = nullptr;
 	autonomousMode = 0;
-
-	//oCamera(CAMERA_NAME);
-	oNetworkTable = &*NetworkTable::GetTable("GRIP/targets"); // GetTable returns a shared pointer, so referencing and dereferencing converts it to a raw pointer
+  
+  oNetworkTable = &*NetworkTable::GetTable("GRIP/targets"); // GetTable returns a shared pointer, so referencing and dereferencing converts it to a raw pointer
 }
 
 //Destructor
@@ -20,9 +19,8 @@ Robot::~Robot(void) {
 	delete oJoystick;
 	delete oLED;
 	delete oDrive;
-	
-	//delete oUSBCamera;
-	delete oNetworkTable;
+  
+  delete oNetworkTable;
 }
 
 //Initialize robot
@@ -51,13 +49,6 @@ void Robot::RobotInit(void) {
 	//oUSBCameraBack->SetBrightness(CAMERA_1_BRIGHTNESS);
 	//oUSBCameraBack->SetExposureAuto();
 	//oUSBCameraBack->UpdateSettings();
-
-	  /*  oUSBCamera.SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
-        cs::CvSink cvSink = CameraServer::GetInstance()->GetVideo();
-        cv::Mat *frame=new cv::Mat();
-        cvSink.GrabFrame(*frame);*/
-
-
 }
 
 // Use Test mode to charge the catapult
@@ -67,7 +58,7 @@ void Robot::Test(void) {
 	 oCatapult->CheckCatapult();
 	 Wait(CYCLE_TIME_DELAY);
 	 }*/
-	oDrive->SetMotors(1,1);
+  oDrive->SetMotors(1,1);
 }
 
 //Autonomous mode
@@ -75,7 +66,6 @@ void Robot::Autonomous(void) {
 	//Load preferences
 		oPrefs = Preferences::GetInstance();
 		autonomousMode = oPrefs->GetInt("Autonomous", 0);
-
 	bool failed = false;
 	switch(autonomousMode) {
 		case 1:		//Left
@@ -129,7 +119,6 @@ void Robot::OperatorControl(void) {
 		coord = oNetworkTable->GetNumberArray("centerX", std::vector<double>());
 		//coord = grip.GripPipeline::GetConvexHullsOutput();
 		SmartDashboard::PutNumber("Empty: ", (double)coord.empty());
-
 		if(!coord.empty()) {
 			SmartDashboard::PutNumber("BLOBS X: ", coord[0]);
 			SmartDashboard::PutNumber("BLOBS Y: ", coord[1]);
@@ -228,7 +217,9 @@ void Robot::OperatorControl(void) {
 		//oCatapult->CheckCatapult();
 		
 		// Wait until next cycle (to prevent needless CPU usage)
+
 		*/Wait(CYCLE_TIME_DELAY);
+
 	}
 	
 	// Stop drive motors
