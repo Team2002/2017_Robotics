@@ -1,9 +1,11 @@
-#ifndef ROBOT_H__INCLUDED	//Make sure this isn't included twice
+#ifndef ROBOT_H__INCLUDED
 #define ROBOT_H__INCLUDED
 
 #include "WPILib.h"
 #include "opencv2/core/core.hpp"
 #include "NetworkTables/NetworkTable.h"
+//#include <opencv2/imgproc/imgproc.hpp>
+//#include <opencv2/core/core.hpp>
 #include "Drive.h"
 #include "Lift.h"
 #include "LED.h"
@@ -21,8 +23,8 @@ public:
 
 private:
 	void ToggleBool(bool, bool&, bool&);
-
-	Joystick *oJoystick;	//Prepending "o" to avoid naming conflicts ("o" for object)
+  
+	Joystick *oJoystick; //Prepending "o" to avoid naming conflicts ("o" for object)
 	LED *oLED;
 	Drive *oDrive;
 	Lift *oLift;
@@ -30,9 +32,12 @@ private:
 	Preferences *oPrefs;
 	int autonomousMode;
 
+	Preferences *oPrefs;
+	int autonomousMode;
+
 	//For vision tracking
-	cs::UsbCamera *oUSBCamera;
-	//USBCamera *oUSBCameraBack;
+	//cs::UsbCamera *oUSBCamera;
+	//cv::VideoCapture *oCamera;
 	//Image *oImage;
 	NetworkTable *oNetworkTable;
 };

@@ -1,23 +1,20 @@
 #include "LED.h"
 #include "Config.h"
 
-
-LED::LED(void){
+LED::LED(void) {
 	oRed = new Relay(PORT_RELAY_RED);
 	oGreen = new Relay(PORT_RELAY_GREEN);
 	oBlue = new Relay(PORT_RELAY_BLUE);
 }
 
-
-LED::~LED(void){
+LED::~LED(void) {
 	delete oRed;
 	delete oGreen;
 	delete oBlue;
 }
 
-
-void LED::ChangeColor(Color color){
-	switch(color){
+void LED::ChangeColor(Color color) {
+	switch(color) {
 		case Red:
 			oRed->Set(Relay::kOn);
 			oGreen->Set(Relay::kOff);
