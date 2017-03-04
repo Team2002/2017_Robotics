@@ -1,5 +1,6 @@
 #include "Robot.h"
 #include "Config.h"
+#include "GripPipeline.h"
 
 //Constructor
 Robot::Robot(void) {
@@ -9,8 +10,8 @@ Robot::Robot(void) {
 	
 	oPrefs = nullptr;
 	autonomousMode = 0;
-
-	oNetworkTable = &*NetworkTable::GetTable("datatable"); // GetTable returns a shared pointer, so referencing and dereferencing converts it to a raw pointer
+  
+  oNetworkTable = &*NetworkTable::GetTable("GRIP/targets"); // GetTable returns a shared pointer, so referencing and dereferencing converts it to a raw pointer
 }
 
 //Destructor
@@ -18,8 +19,8 @@ Robot::~Robot(void) {
 	delete oJoystick;
 	delete oLED;
 	delete oDrive;
-	
-	delete oNetworkTable;
+  
+  delete oNetworkTable;
 }
 
 //Initialize robot
@@ -48,11 +49,6 @@ void Robot::RobotInit(void) {
 	//oUSBCameraBack->SetBrightness(CAMERA_1_BRIGHTNESS);
 	//oUSBCameraBack->SetExposureAuto();
 	//oUSBCameraBack->UpdateSettings();
-	CameraServer::GetInstance()->StartAutomaticCapture();
-
-	//Load preferences
-	oPrefs = Preferences::GetInstance();
-	autonomousMode = oPrefs->GetInt("Autonomous", 0);
 }
 
 // Use Test mode to charge the catapult
@@ -62,10 +58,14 @@ void Robot::Test(void) {
 	 oCatapult->CheckCatapult();
 	 Wait(CYCLE_TIME_DELAY);
 	 }*/
+  oDrive->SetMotors(1,1);
 }
 
 //Autonomous mode
 void Robot::Autonomous(void) {
+	//Load preferences
+		oPrefs = Preferences::GetInstance();
+		autonomousMode = oPrefs->GetInt("Autonomous", 0);
 	bool failed = false;
 	switch(autonomousMode) {
 		case 1:		//Left
@@ -86,7 +86,7 @@ void Robot::Autonomous(void) {
 			break;
 
 		default:	//Nonsense value
-			SmartDashboard::PutNumber("Error: ", autonomousMode);
+			SmartDashboard::PutNumber("Autonomous Error: ", autonomousMode);
 			failed = true;
 			break;
 	}
@@ -99,20 +99,31 @@ void Robot::Autonomous(void) {
 //Tele-op
 void Robot::OperatorControl(void) {
 	float speedLeft, speedRight;		// Drive motor speeds for manual control
-	bool reversed = false,		// Keeps track of robot being in reverse mode
+	bool reversed = false,				// Keeps track of robot being in reverse mode
 		reverseButtonPressed = false;	// Needed for toggling reverse mode
-	std::vector<double> coord;		// Target coordinates sent from RoboRealm
+	std::vector<double> coord;			// Target coordinates sent from GRIP
+	//grip::GripPipeline grip();			//Grip object
+	//cv::Mat frame;						//Image
+	//cv::VideoCapture camera;			//Camera
+
+	//camera.set(CV_CAP_PROP_FRAME_WIDTH, CAMERA_RES_X);
+	//camera.set(CV_CAP_PROP_FRAME_HEIGHT, CAMERA_RES_Y);
+
 	
 	// Continue updating robot while in tele-op mode
 	while(IsOperatorControl() && IsEnabled()) {
-		
-		// For camera calibrating, sends target data to smart dashboarad
-		coord = oNetworkTable->GetNumberArray("BLOBS", std::vector<double>());
+
+		// For camera calibrating, sends target data to smart dashboard
+		//camera.read(frame);
+		//grip.GripPipeline::Process(frame);
+		coord = oNetworkTable->GetNumberArray("centerX", std::vector<double>());
+		//coord = grip.GripPipeline::GetConvexHullsOutput();
+		SmartDashboard::PutNumber("Empty: ", (double)coord.empty());
 		if(!coord.empty()) {
 			SmartDashboard::PutNumber("BLOBS X: ", coord[0]);
 			SmartDashboard::PutNumber("BLOBS Y: ", coord[1]);
 		}
-		
+		/*
 		// Autonomous target tracking
 		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
 			
@@ -123,7 +134,7 @@ void Robot::OperatorControl(void) {
 			SmartDashboard::PutNumber("SPEED: ", speed);
 			
 			// Get targets coordinates from the network table (return empty vector if network table is unreachable)
-			coord = oNetworkTable->GetNumberArray("BLOBS", std::vector<double>());
+			//coord = oNetworkTable->GetNumberArray("centerX", std::vector<double>());
 			
 			// Make sure the network table returned values
 			if(!coord.empty()) {
@@ -206,7 +217,9 @@ void Robot::OperatorControl(void) {
 		//oCatapult->CheckCatapult();
 		
 		// Wait until next cycle (to prevent needless CPU usage)
-		Wait(CYCLE_TIME_DELAY);
+
+		*/Wait(CYCLE_TIME_DELAY);
+
 	}
 	
 	// Stop drive motors

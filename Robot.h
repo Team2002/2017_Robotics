@@ -3,6 +3,8 @@
 
 #include "WPILib.h"
 #include "NetworkTables/NetworkTable.h"
+//#include <opencv2/imgproc/imgproc.hpp>
+//#include <opencv2/core/core.hpp>
 #include "Drive.h"
 #include "LED.h"
 
@@ -18,7 +20,7 @@ public:
 
 private:
 	void ToggleBool(bool, bool&, bool&);
-	static void VisionThread();
+  
 	Joystick *oJoystick; //Prepending "o" to avoid naming conflicts ("o" for object)
 	LED *oLED;
 	Drive *oDrive;
@@ -28,7 +30,7 @@ private:
 
 	//For vision tracking
 	//cs::UsbCamera *oUSBCamera;
-	//USBCamera *oUSBCamera;
+	//cv::VideoCapture *oCamera;
 	//Image *oImage;
 	NetworkTable *oNetworkTable;
 };
