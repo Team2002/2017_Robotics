@@ -2,11 +2,14 @@
 #define ROBOT_H__INCLUDED
 
 #include "WPILib.h"
+#include "opencv2/core/core.hpp"
 #include "NetworkTables/NetworkTable.h"
 //#include <opencv2/imgproc/imgproc.hpp>
 //#include <opencv2/core/core.hpp>
 #include "Drive.h"
+#include "Lift.h"
 #include "LED.h"
+//#include "USBCamera.cpp"
 
 class Robot: public SampleRobot {
 public:
@@ -24,6 +27,10 @@ private:
 	Joystick *oJoystick; //Prepending "o" to avoid naming conflicts ("o" for object)
 	LED *oLED;
 	Drive *oDrive;
+	Lift *oLift;
+
+	Preferences *oPrefs;
+	int autonomousMode;
 
 	Preferences *oPrefs;
 	int autonomousMode;

@@ -7,6 +7,7 @@ Robot::Robot(void) {
 	oJoystick = new Joystick(PORT_JOYSTICK);
 	oLED = new LED();
 	oDrive = new Drive();
+	oLift = new Lift();
 	
 	oPrefs = nullptr;
 	autonomousMode = 0;
@@ -194,22 +195,28 @@ void Robot::OperatorControl(void) {
 			// Set drive motors
 			oDrive->SetMotors(speedLeft, speedRight);
 			
+			// Robot Lift Mechanism
+			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_LIFT_UP))
+				oLift->SetMotorsLift();
+			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_SLOW_ASCENT))
+				oLift->SlowMotorsLift();
+
 			// Boulder intake piston
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_DOWN))
+			//if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_DOWN))
 				; //oCatapult->SetIntakeState(Catapult::DOWN);
 			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_UP))
 				oDrive->SetMotors(1, 1); //oCatapult->SetIntakeState(Catapult::UP);
 				
 			// Boulder intake wheels
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD))
+			//if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD))
 				; //oCatapult->ForceIntakeWheels(Catapult::FORWARD);
-			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_BACK))
+			//else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_BACK))
 				; //oCatapult->ForceIntakeWheels(Catapult::BACK);
-			else
+			//else
 				; //oCatapult->ForceIntakeWheels(Catapult::OFF);
 				
 			// Fire boulder
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FIRE_BOULDER))
+			//if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FIRE_BOULDER))
 				; //oCatapult->SetLaunchState(Catapult::FIRE);
 		}
 		
@@ -219,7 +226,6 @@ void Robot::OperatorControl(void) {
 		// Wait until next cycle (to prevent needless CPU usage)
 
 		*/Wait(CYCLE_TIME_DELAY);
-
 	}
 	
 	// Stop drive motors
