@@ -1,11 +1,13 @@
 #include "Robot.h"
 #include "Config.h"
+#include "GripPipeline.h"
 
 //Constructor
 Robot::Robot(void) {
 	oJoystick = new Joystick(PORT_JOYSTICK);
 	oLED = new LED();
 	oDrive = new Drive();
+	oLift = new Lift();
 	
 	oPrefs = nullptr;
 
@@ -18,9 +20,6 @@ Robot::~Robot(void) {
 	delete oJoystick;
 	delete oLED;
 	delete oDrive;
-	
-	//delete oUSBCamera;
-	//delete oNetworkTable;
 }
 
 //Initialize robot
@@ -43,19 +42,6 @@ void Robot::RobotInit(void) {
 	cs::UsbCamera USBCamera = CameraServer::GetInstance()->StartAutomaticCapture(0);
 	oUSBCamera->SetFPS(CAMERA_FPS);
 	oUSBCamera->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
-	//oUSBCameraFront->SetExposureManual(CAMERA_0_EXPOSURE);
-	//oUSBCameraFront->UpdateSettings();
-	//oUSBCameraBack->SetFPS(CAMERA_FPS);
-	//oUSBCameraBack->SetSize(CAMERA_RES_X, CAMERA_RES_Y);
-	//oUSBCameraBack->SetBrightness(CAMERA_1_BRIGHTNESS);
-	//oUSBCameraBack->SetExposureAuto();
-	//oUSBCameraBack->UpdateSettings();
-
-	/*  oUSBCamera.SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
-	 cs::CvSink cvSink = CameraServer::GetInstance()->GetVideo();
-	 cv::Mat *frame=new cv::Mat();
-	 cvSink.GrabFrame(*frame);*/
-
 }
 
 // Use Test mode to charge the catapult
@@ -136,7 +122,7 @@ void Robot::OperatorControl(void) {
 			float speed = SLOPE * voltage + (SPEED_1 - (SLOPE * VOLTAGE_1));
 			SmartDashboard::PutNumber("VOLTAGE: ", voltage);
 			SmartDashboard::PutNumber("SPEED: ", speed);
-
+      
 			// Make sure the network table returned values
 			if(coord.size() == 4) {
 
@@ -227,7 +213,6 @@ void Robot::OperatorControl(void) {
 		//oCatapult->CheckCatapult();
 
 		// Wait until next cycle (to prevent needless CPU usage)
-		Wait(CYCLE_TIME_DELAY);
 	}
 
 	// Stop drive motors
