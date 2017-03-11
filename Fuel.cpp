@@ -1,39 +1,20 @@
-#include "Lift.h"
+#include "Fuel.h"
 #include "Config.h"
 
-//Constructor
-Lift::Lift(void) {
-	oClimbMotor = new Talon(PORT_TALON_LIFT); //change PORT to whatever port we're using
+Fuel::Fuel(void) {
+	oLaunchMotor = new Talon(PORT_TALON_LAUNCH);
 }
 
-//Destructor
-Lift::~Lift(void) {
-	delete oClimbMotor;
+Fuel::~Fuel(void) {
+	delete oLaunchMotor;
 }
 
 //Set motor speed
-void Lift::SetMotorsLift(float liftButton) {
-	liftButton *= SPEED_MOTOR_MULTIPLIER;
-
-	if(DRIVE_MOTOR_LIFT_UP) //change variable (make button start)
-		oClimbMotor->Set(liftButton);
-	else
-		oClimbMotor->Set(0);
-
-	if(DRIVE_MOTOR_LIFT_STOP) //change variable (make button stop)
-		oClimbMotor->Set(0);
-	else
-		oClimbMotor->Set(liftButton);
-	if(DRIVE_MOTOR_LIFT_FINAL_STOP) //change variable (make button stop for the final)
-		oClimbMotor->Set((liftButton/(4)));
-	else
-		oClimbMotor->Set(liftButton);
+void Fuel::SetLaunchMotor(void) {
+	oLaunchMotor->Set(1);
 }
 
 //Stop the motors
-void Lift::StopMotorsLift(void) {
-	oClimbMotor->Set(0);
+void Fuel::StopLaunchMotor(void) {
+	oLaunchMotor->Set(0);
 }
-
-
-

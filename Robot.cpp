@@ -7,6 +7,7 @@ Robot::Robot(void) {
 	oJoystick = new Joystick(PORT_JOYSTICK);
 	oLED = new LED();
 	oDrive = new Drive();
+	oFuel = new Fuel();
 	oLift = new Lift();
 	
 	oPrefs = nullptr;
@@ -20,6 +21,10 @@ Robot::~Robot(void) {
 	delete oJoystick;
 	delete oLED;
 	delete oDrive;
+	delete oFuel;
+	delete oLift;
+	
+	delete oUSBCamera;
 }
 
 //Initialize robot
@@ -97,79 +102,24 @@ void Robot::OperatorControl(void) {
 		center;					//Target for auto aim thing
 	bool reversed = false,			//Keeps track of robot being in reverse mode
 		reverseButtonPressed = false,	//Needed for toggling reverse mode
+		climbButtonPressed = false,		//If climbing button has been pressed
 		onTarget = false;		//Whether the robot is going towards the gear
 	std::vector<double> coord;			//Target coordinates sent from GRIP
 	
 	// Continue updating robot while in tele-op mode
 	while(IsOperatorControl() && IsEnabled()) {
 
-		// For camera calibrating, sends target data to smart dashboard
-		coord = oNetworkTable->GetNumberArray("BLOBS", std::vector<double>());
-		SmartDashboard::PutNumber("Empty: ", (double) coord.empty());
-
-		if(coord.size() == 4) {
-			SmartDashboard::PutNumber("Blob1 X: ", coord[0]);
-			SmartDashboard::PutNumber("Blob2 X: ", coord[2]);
-			center = (coord[0] + coord[2]) / 2;
-			SmartDashboard::PutNumber("Center: ", center);
-		}
+		GetVision(coord, center);
 
 		// Autonomous target tracking
-		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
-
-			// Calculate drive motor speed based on battery voltage
-			float voltage = DriverStation::GetInstance().GetBatteryVoltage();
-			float speed = SLOPE * voltage + (SPEED_1 - (SLOPE * VOLTAGE_1));
-			SmartDashboard::PutNumber("VOLTAGE: ", voltage);
-			SmartDashboard::PutNumber("SPEED: ", speed);
-      
-			// Make sure the network table returned values
-			if(coord.size() == 4) {
-
-				// First correct robot orientation (x axis on image)...
-				if(center < TARGET_X - (CENTERED_THRESHOLD * CAMERA_RES_X)) {
-					oDrive->SetMotors(-speed, speed);
-					onTarget = false;
-				} else if(center > TARGET_X + (CENTERED_THRESHOLD * CAMERA_RES_X)) {
-					oDrive->SetMotors(speed, -speed);
-					onTarget = false;
-				} else {
-
-					/*// ...then correct robot distance to target (y axis on image)
-					 if(coord[1] < TARGET_Y - (CENTERED_THRESHOLD * CAMERA_RES_Y))
-					 oDrive->SetMotors(speed, speed);
-					 else if(coord[1] > TARGET_Y + (CENTERED_THRESHOLD * CAMERA_RES_Y))
-					 oDrive->SetMotors(-speed, -speed);
-					 else {*/
-
-					// Robot is on target, stop robot and make sure it is still on target
-					if(!onTarget) {
-						onTarget = true;
-						oDrive->StopMotors(); // Stop motors
-						Wait(0.5); // Wait for robot to stop moving
-					}
-					if(abs(center - TARGET_X) < (CENTERED_THRESHOLD * CAMERA_RES_X)) {
-						//Put gear on
-						oDrive->SetMotors(speed, speed);
-						if(abs(coord[0] - coord[2]) > STOP_DISTANCE) {
-							oDrive->StopMotors();
-							onTarget = false;
-						}
-					}
-				}
-			}
-
-			// If the network table did not return values, stop drive motors
-			else {
-				oDrive->StopMotors();
-			}
-		}
+		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET))
+			AutoTarget(coord, center, onTarget);
 
 		// Manual driver control
 		else {
 
 			// Reset auto target tracking variable
-			//firingCatapult = false;
+			onTarget = false;
 
 			// Get joystick values (negated because the stupid driver station reads them that way)
 			speedLeft = -oJoystick->GetRawAxis(JOYSTICK_AXIS_LEFT);
@@ -182,41 +132,106 @@ void Robot::OperatorControl(void) {
 			// Reverse mode toggling
 			ToggleBool(oJoystick->GetRawButton(JOYSTICK_BUTTON_REVERSE), reverseButtonPressed, reversed);
 			if(reversed) {
-				float speedLeftTemp = speedLeft;
+				float temp = speedLeft;
 				speedLeft = -speedRight;
-				speedRight = -speedLeftTemp;
+				speedRight = -temp;
 			}
 
 			// Set drive motors
 			oDrive->SetMotors(speedLeft, speedRight);
 
-			// Boulder intake piston
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_DOWN))
-				;		//oCatapult->SetIntakeState(Catapult::DOWN);
-			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_UP))
-				oDrive->SetMotors(1, 1);//oCatapult->SetIntakeState(Catapult::UP);
-
-			// Boulder intake wheels
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD))
-				;		//oCatapult->ForceIntakeWheels(Catapult::FORWARD);
-			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_BACK))
-				;		//oCatapult->ForceIntakeWheels(Catapult::BACK);
+			//Fuel
+			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_LAUNCH))
+				oFuel->SetLaunchMotor();
 			else
-				;		//oCatapult->ForceIntakeWheels(Catapult::OFF);
+				oFuel->StopLaunchMotor();
 
-			// Fire boulder
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FIRE_BOULDER))
-				;		//oCatapult->SetLaunchState(Catapult::FIRE);
+			//Lift
+			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_CLIMB)) {
+				climbButtonPressed = true;
+				oLift->StartLiftMotor();
+			} else if(climbButtonPressed)
+				oLift->SlowLiftMotor();
+
+			//Clear button press I.C.E.
+			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_STOP_CLIMB))
+				climbButtonPressed = false;
+
+
 		}
 
 		// Check if the catapult needs to do anything
 		//oCatapult->CheckCatapult();
 
 		// Wait until next cycle (to prevent needless CPU usage)
+		Wait(CYCLE_TIME_DELAY);
 	}
 
 	// Stop drive motors
 	oDrive->StopMotors();
+}
+
+void Robot::GetVision(std::vector<double> &coord, float &center) {
+	// For camera calibrating, sends target data to smart dashboard
+	coord = oNetworkTable->GetNumberArray("BLOBS", std::vector<double>());
+	SmartDashboard::PutNumber("Empty: ", (double) coord.empty());
+
+	if(coord.size() == 4) {
+		SmartDashboard::PutNumber("Blob1 X: ", coord[0]);
+		SmartDashboard::PutNumber("Blob2 X: ", coord[2]);
+		center = (coord[0] + coord[2]) / 2;
+		SmartDashboard::PutNumber("Center: ", center);
+	}
+}
+
+void Robot::AutoTarget(std::vector<double> &coord, float &center, bool &onTarget) {
+
+	// Calculate drive motor speed based on battery voltage
+	float voltage = DriverStation::GetInstance().GetBatteryVoltage();
+	float speed = SLOPE * voltage + (SPEED_1 - (SLOPE * VOLTAGE_1));
+	SmartDashboard::PutNumber("VOLTAGE: ", voltage);
+	SmartDashboard::PutNumber("SPEED: ", speed);
+
+	// Make sure the network table returned values
+	if(coord.size() == 4) {
+
+		// First correct robot orientation (x axis on image)...
+		if(center < TARGET_X - (CENTERED_THRESHOLD * CAMERA_RES_X)) {
+			oDrive->SetMotors(-speed, speed);
+			onTarget = false;
+		} else if(center > TARGET_X + (CENTERED_THRESHOLD * CAMERA_RES_X)) {
+			oDrive->SetMotors(speed, -speed);
+			onTarget = false;
+		} else {
+
+			/* ...then correct robot distance to target (y axis on image)
+			 if(coord[1] < TARGET_Y - (CENTERED_THRESHOLD * CAMERA_RES_Y))
+			 oDrive->SetMotors(speed, speed);
+			 else if(coord[1] > TARGET_Y + (CENTERED_THRESHOLD * CAMERA_RES_Y))
+			 oDrive->SetMotors(-speed, -speed);
+			 else {*/
+
+			// Robot is on target, stop robot and make sure it is still on target
+			if(!onTarget) {
+				onTarget = true;
+				oDrive->StopMotors(); // Stop motors
+				Wait(0.5); // Wait for robot to stop moving
+			}
+			if(abs(center - TARGET_X) < (CENTERED_THRESHOLD * CAMERA_RES_X)) {
+				//Put gear on
+				oDrive->SetMotors(speed, speed);
+				if(abs(coord[0] - coord[2]) > STOP_DISTANCE) {
+					oDrive->StopMotors();
+					onTarget = false;
+				}
+			}
+		}
+	}
+
+	// If the network table did not return values, stop drive motors
+	else {
+		oDrive->StopMotors();
+	}
 }
 
 /*
