@@ -64,6 +64,9 @@ const int JOYSTICK_BUTTON_LAUNCH = -1;
 // Shooting
 const float LAUNCH_MOTOR_SPEED = 1; // Speed to run motor when shooting
 
+// Shooting
+const float LAUNCH_MOTOR_SPEED = 1; // Speed to run motor when shooting
+
 // Camera Settings
 const char CAMERA_NAME[] = "cam0\0"; // Found in RoboRio web interface
 const int CAMERA_RES_X = 640;

@@ -1,5 +1,6 @@
 #include "Robot.h"
 #include "Config.h"
+#include "GripPipeline.h"
 
 //Constructor
 Robot::Robot(void) {
@@ -156,6 +157,7 @@ void Robot::OperatorControl(void) {
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_STOP_CLIMB))
 				climbButtonPressed = false;
 
+
 		}
 
 		// Check if the catapult needs to do anything
@@ -230,7 +232,6 @@ void Robot::AutoTarget(std::vector<double> &coord, float &center, bool &onTarget
 	else {
 		oDrive->StopMotors();
 	}
-
 }
 
 /*
