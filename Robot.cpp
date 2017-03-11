@@ -1,6 +1,5 @@
 #include "Robot.h"
 #include "Config.h"
-#include "GripPipeline.h"
 
 //Constructor
 Robot::Robot(void) {
@@ -9,10 +8,9 @@ Robot::Robot(void) {
 	oDrive = new Drive();
 	
 	oPrefs = nullptr;
-	autonomousMode = 0;
 
-	//oCamera(CAMERA_NAME);
-	oNetworkTable = &*NetworkTable::GetTable("GRIP/targets"); // GetTable returns a shared pointer, so referencing and dereferencing converts it to a raw pointer
+	oUSBCamera = new cs::UsbCamera(CAMERA_NAME, true);
+	oNetworkTable = NetworkTable::GetTable("RoboRealm"); // GetTable returns a shared pointer
 }
 
 //Destructor
@@ -22,7 +20,7 @@ Robot::~Robot(void) {
 	delete oDrive;
 	
 	//delete oUSBCamera;
-	delete oNetworkTable;
+	//delete oNetworkTable;
 }
 
 //Initialize robot
@@ -42,8 +40,9 @@ void Robot::RobotInit(void) {
 	 }*/
 
 	// Camera settings
-	//oUSBCamera->SetFPS(CAMERA_FPS);
-	//oUSBCamera->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
+	cs::UsbCamera USBCamera = CameraServer::GetInstance()->StartAutomaticCapture(0);
+	oUSBCamera->SetFPS(CAMERA_FPS);
+	oUSBCamera->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
 	//oUSBCameraFront->SetExposureManual(CAMERA_0_EXPOSURE);
 	//oUSBCameraFront->UpdateSettings();
 	//oUSBCameraBack->SetFPS(CAMERA_FPS);
@@ -52,11 +51,10 @@ void Robot::RobotInit(void) {
 	//oUSBCameraBack->SetExposureAuto();
 	//oUSBCameraBack->UpdateSettings();
 
-	  /*  oUSBCamera.SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
-        cs::CvSink cvSink = CameraServer::GetInstance()->GetVideo();
-        cv::Mat *frame=new cv::Mat();
-        cvSink.GrabFrame(*frame);*/
-
+	/*  oUSBCamera.SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
+	 cs::CvSink cvSink = CameraServer::GetInstance()->GetVideo();
+	 cv::Mat *frame=new cv::Mat();
+	 cvSink.GrabFrame(*frame);*/
 
 }
 
@@ -67,15 +65,16 @@ void Robot::Test(void) {
 	 oCatapult->CheckCatapult();
 	 Wait(CYCLE_TIME_DELAY);
 	 }*/
-	oDrive->SetMotors(1,1);
+	oDrive->SetMotors(1, 1);
 }
 
 //Autonomous mode
 void Robot::Autonomous(void) {
 	//Load preferences
-		oPrefs = Preferences::GetInstance();
-		autonomousMode = oPrefs->GetInt("Autonomous", 0);
+	oPrefs = Preferences::GetInstance();
+	int autonomousMode = oPrefs->GetInt("Auto", 0);
 
+	SmartDashboard::PutNumber("Autonomous Error: ", 0.1);
 	bool failed = false;
 	switch(autonomousMode) {
 		case 1:		//Left
@@ -108,67 +107,67 @@ void Robot::Autonomous(void) {
 
 //Tele-op
 void Robot::OperatorControl(void) {
-	float speedLeft, speedRight;		// Drive motor speeds for manual control
-	bool reversed = false,				// Keeps track of robot being in reverse mode
-		reverseButtonPressed = false;	// Needed for toggling reverse mode
-	std::vector<double> coord;			// Target coordinates sent from GRIP
-	//grip::GripPipeline grip();			//Grip object
-	//cv::Mat frame;						//Image
-	//cv::VideoCapture camera;			//Camera
-
-	//camera.set(CV_CAP_PROP_FRAME_WIDTH, CAMERA_RES_X);
-	//camera.set(CV_CAP_PROP_FRAME_HEIGHT, CAMERA_RES_Y);
-
+	float speedLeft, speedRight,		//Drive motor speeds for manual control
+		center;					//Target for auto aim thing
+	bool reversed = false,			//Keeps track of robot being in reverse mode
+		reverseButtonPressed = false,	//Needed for toggling reverse mode
+		onTarget = false;		//Whether the robot is going towards the gear
+	std::vector<double> coord;			//Target coordinates sent from GRIP
 	
 	// Continue updating robot while in tele-op mode
 	while(IsOperatorControl() && IsEnabled()) {
 
 		// For camera calibrating, sends target data to smart dashboard
-		//camera.read(frame);
-		//grip.GripPipeline::Process(frame);
-		coord = oNetworkTable->GetNumberArray("centerX", std::vector<double>());
-		//coord = grip.GripPipeline::GetConvexHullsOutput();
-		SmartDashboard::PutNumber("Empty: ", (double)coord.empty());
+		coord = oNetworkTable->GetNumberArray("BLOBS", std::vector<double>());
+		SmartDashboard::PutNumber("Empty: ", (double) coord.empty());
 
-		if(!coord.empty()) {
-			SmartDashboard::PutNumber("BLOBS X: ", coord[0]);
-			SmartDashboard::PutNumber("BLOBS Y: ", coord[1]);
+		if(coord.size() == 4) {
+			SmartDashboard::PutNumber("Blob1 X: ", coord[0]);
+			SmartDashboard::PutNumber("Blob2 X: ", coord[2]);
+			center = (coord[0] + coord[2]) / 2;
+			SmartDashboard::PutNumber("Center: ", center);
 		}
-		/*
+
 		// Autonomous target tracking
 		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET)) {
-			
+
 			// Calculate drive motor speed based on battery voltage
 			float voltage = DriverStation::GetInstance().GetBatteryVoltage();
 			float speed = SLOPE * voltage + (SPEED_1 - (SLOPE * VOLTAGE_1));
 			SmartDashboard::PutNumber("VOLTAGE: ", voltage);
 			SmartDashboard::PutNumber("SPEED: ", speed);
-			
-			// Get targets coordinates from the network table (return empty vector if network table is unreachable)
-			//coord = oNetworkTable->GetNumberArray("centerX", std::vector<double>());
-			
+
 			// Make sure the network table returned values
-			if(!coord.empty()) {
-				
+			if(coord.size() == 4) {
+
 				// First correct robot orientation (x axis on image)...
-				if(coord[0] < TARGET_X - (CENTERED_THRESHOLD * CAMERA_RES_X))
+				if(center < TARGET_X - (CENTERED_THRESHOLD * CAMERA_RES_X)) {
 					oDrive->SetMotors(-speed, speed);
-				else if(coord[0] > TARGET_X + (CENTERED_THRESHOLD * CAMERA_RES_X))
+					onTarget = false;
+				} else if(center > TARGET_X + (CENTERED_THRESHOLD * CAMERA_RES_X)) {
 					oDrive->SetMotors(speed, -speed);
-				else {
-					
-					// ...then correct robot distance to target (y axis on image)
-					if(coord[1] < TARGET_Y - (CENTERED_THRESHOLD * CAMERA_RES_Y))
-						oDrive->SetMotors(speed, speed);
-					else if(coord[1] > TARGET_Y + (CENTERED_THRESHOLD * CAMERA_RES_Y))
-						oDrive->SetMotors(-speed, -speed);
-					else {
-						
-						// Robot is on target, stop robot and make sure it is still on target
+					onTarget = false;
+				} else {
+
+					/*// ...then correct robot distance to target (y axis on image)
+					 if(coord[1] < TARGET_Y - (CENTERED_THRESHOLD * CAMERA_RES_Y))
+					 oDrive->SetMotors(speed, speed);
+					 else if(coord[1] > TARGET_Y + (CENTERED_THRESHOLD * CAMERA_RES_Y))
+					 oDrive->SetMotors(-speed, -speed);
+					 else {*/
+
+					// Robot is on target, stop robot and make sure it is still on target
+					if(!onTarget) {
+						onTarget = true;
 						oDrive->StopMotors(); // Stop motors
 						Wait(0.5); // Wait for robot to stop moving
-						if(abs(coord[0] - TARGET_X) < (CENTERED_THRESHOLD * CAMERA_RES_X) && abs(coord[1] - TARGET_Y) < (CENTERED_THRESHOLD * CAMERA_RES_Y)) {
-							//put gear on
+					}
+					if(abs(center - TARGET_X) < (CENTERED_THRESHOLD * CAMERA_RES_X)) {
+						//Put gear on
+						oDrive->SetMotors(speed, speed);
+						if(abs(coord[0] - coord[2]) > STOP_DISTANCE) {
+							oDrive->StopMotors();
+							onTarget = false;
 						}
 					}
 				}
@@ -182,18 +181,18 @@ void Robot::OperatorControl(void) {
 
 		// Manual driver control
 		else {
-			
+
 			// Reset auto target tracking variable
 			//firingCatapult = false;
-			
+
 			// Get joystick values (negated because the stupid driver station reads them that way)
 			speedLeft = -oJoystick->GetRawAxis(JOYSTICK_AXIS_LEFT);
 			speedRight = -oJoystick->GetRawAxis(JOYSTICK_AXIS_RIGHT);
-			
+
 			// Turn locking. Forces all motors to go the same speed.
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_LOCK_TURNING))
 				speedLeft = speedRight;
-			
+
 			// Reverse mode toggling
 			ToggleBool(oJoystick->GetRawButton(JOYSTICK_BUTTON_REVERSE), reverseButtonPressed, reversed);
 			if(reversed) {
@@ -201,42 +200,38 @@ void Robot::OperatorControl(void) {
 				speedLeft = -speedRight;
 				speedRight = -speedLeftTemp;
 			}
-			
+
 			// Set drive motors
 			oDrive->SetMotors(speedLeft, speedRight);
-			
+
 			// Boulder intake piston
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_DOWN))
-				; //oCatapult->SetIntakeState(Catapult::DOWN);
+				;		//oCatapult->SetIntakeState(Catapult::DOWN);
 			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_INTAKE_UP))
-				oDrive->SetMotors(1, 1); //oCatapult->SetIntakeState(Catapult::UP);
-				
+				oDrive->SetMotors(1, 1);//oCatapult->SetIntakeState(Catapult::UP);
+
 			// Boulder intake wheels
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD))
-				; //oCatapult->ForceIntakeWheels(Catapult::FORWARD);
+				;		//oCatapult->ForceIntakeWheels(Catapult::FORWARD);
 			else if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FORCE_INTAKE_BACK))
-				; //oCatapult->ForceIntakeWheels(Catapult::BACK);
+				;		//oCatapult->ForceIntakeWheels(Catapult::BACK);
 			else
-				; //oCatapult->ForceIntakeWheels(Catapult::OFF);
-				
+				;		//oCatapult->ForceIntakeWheels(Catapult::OFF);
+
 			// Fire boulder
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_FIRE_BOULDER))
-				; //oCatapult->SetLaunchState(Catapult::FIRE);
+				;		//oCatapult->SetLaunchState(Catapult::FIRE);
 		}
-		
+
 		// Check if the catapult needs to do anything
 		//oCatapult->CheckCatapult();
-		
+
 		// Wait until next cycle (to prevent needless CPU usage)
-		*/Wait(CYCLE_TIME_DELAY);
+		Wait(CYCLE_TIME_DELAY);
 	}
-	
+
 	// Stop drive motors
 	oDrive->StopMotors();
-	
-	// Stop camera
-	//oUSBCameraFront->StopCapture();
-	//oUSBCameraBack->StopCapture();
 }
 
 /*

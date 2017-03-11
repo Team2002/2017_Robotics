@@ -26,13 +26,12 @@ private:
 	Drive *oDrive;
 
 	Preferences *oPrefs;
-	int autonomousMode;
 
 	//For vision tracking
-	//cs::UsbCamera *oUSBCamera;
+	cs::UsbCamera *oUSBCamera;
 	//cv::VideoCapture *oCamera;
 	//Image *oImage;
-	NetworkTable *oNetworkTable;
+	std::shared_ptr<NetworkTable> oNetworkTable;
 };
 
 #endif /* ROBOT_H__INCLUDED */
