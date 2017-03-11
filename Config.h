@@ -78,6 +78,7 @@ const unsigned int CAMERA_EXPOSURE = 0;
 const int TARGET_X = 295; // Target x coordinate
 const int TARGET_Y = 420; // Target y coordinate
 const float CENTERED_THRESHOLD = 0.04; // Threshold for considering the target centered (CENTERED_THRESHOLD * RES_X/RES_Y = pixels target can be off)
+const int STOP_DISTANCE = 100; //Distance between targets when at lift
 const float VOLTAGE_1 = 11; // Two points for creating the line that calculates what the motor speed should be during tracking based on battery voltage
 const float SPEED_1 = 0.5;
 const float VOLTAGE_2 = 13;
