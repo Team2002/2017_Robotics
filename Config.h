@@ -6,25 +6,20 @@ const int PORT_JOYSTICK = 0; // Joysticks
 
 // PWM Ports
 const int PORT_TALON_DRIVE_FRONTLEFT = 0; // Talons (Motor Controllers)
-const int PORT_TALON_DRIVE_FRONTRIGHT = 3;
-const int PORT_TALON_DRIVE_BACKLEFT = 2;
-const int PORT_TALON_DRIVE_BACKRIGHT = 5;
+const int PORT_TALON_DRIVE_FRONTRIGHT = 2;
+const int PORT_TALON_DRIVE_BACKLEFT = 3;
+const int PORT_TALON_DRIVE_BACKRIGHT = 4;
 const int PORT_TALON_LIFT_LEFT_UP = -1;
 const int PORT_TALON_LIFT_RIGHT_UP = -1;
 const int PORT_TALON_LIFT_LEFT_DOWN = -1;
 const int PORT_TALON_LIFT_RIGHT_DOWN = -1;
 const int PORT_TALON_LAUNCH = 5;
-const int PORT_TALON_INTAKE = 4;
+const int PORT_TALON_INTAKE = -1;
+const int PORT_TALON_LIFT = 6;
 
 // DIO Ports
-const int PORT_LIMIT_SWITCH_LAUNCH = 0; // Limit Switches
-const int PORT_LIMIT_SWITCH_INTAKE = 1;
-
-// PCM Ports
-const int PORT_SOLENOID_INTAKE_1 = 5; // Double Solenoids
-const int PORT_SOLENOID_INTAKE_2 = 4;
-const int PORT_SOLENOID_LIFT_1 = -1;
-const int PORT_SOLENOID_LIFT_2 = -1;
+//const int PORT_LIMIT_SWITCH_LAUNCH = 0; // Limit Switches
+//const int PORT_LIMIT_SWITCH_INTAKE = 1;
 
 // Relay Ports
 const int PORT_RELAY_RED = 0; // Spike H-Bridge Relays (for LEDs)
@@ -45,6 +40,12 @@ const bool LIFT_MOTOR_RIGHT_DOWN_REVERSED = true;
 const bool INTAKE_MOTOR_REVERSED = true; // Catapult
 const bool LAUNCH_MOTOR_REVERSED = true;
 
+// Motor Speed
+const float LEFT_MOTOR_MULTIPLIER = 1;
+const float RIGHT_MOTOR_MULTIPLIER = 1;
+const float CLIMB_MOTOR_MULTIPLIER = 1;
+const float LAUNCH_MOTOR_MULTIPLIER = 1;
+
 // Joystick Setup
 const int JOYSTICK_AXIS_LEFT = 1; // Axes
 const int JOYSTICK_AXIS_RIGHT = 3;
@@ -52,26 +53,22 @@ const int JOYSTICK_AXIS_RIGHT = 3;
 const int JOYSTICK_BUTTON_REVERSE = 4; // Buttons
 const int JOYSTICK_BUTTON_LOCK_TURNING = 6;
 const int JOYSTICK_BUTTON_TRACK_TARGET = 5;
-const int JOYSTICK_BUTTON_FIRE_BOULDER = 3;
-const int JOYSTICK_BUTTON_INTAKE_UP = 1;
-const int JOYSTICK_BUTTON_INTAKE_DOWN = 2;
-const int JOYSTICK_BUTTON_FORCE_INTAKE_FORWARD = 9;
-const int JOYSTICK_BUTTON_FORCE_INTAKE_BACK = 10;
-const int JOYSTICK_BUTTON_CAMERA_TOGGLE = 8;
-const int JOYSTICK_BUTTON_LIFT_UP = -1;
-const int JOYSTICK_BUTTON_LIFT_DOWN = -1;
-const int JOYSTICK_BUTTON_LIFT_TOGGLE = -1;
+const int JOYSTICK_BUTTON_RELEASE_FUEL = 3;
+const int JOYSTICK_BUTTON_INTAKE = 1;
+const int JOYSTICK_BUTTON_LIFT_UP = 7;
+const int JOYSTICK_BUTTON_SLOW_ASCENT = 8;
+const int JOYSTICK_BUTTON_CLIMB = -1;
+const int JOYSTICK_BUTTON_STOP_CLIMB = -1;
+const int JOYSTICK_BUTTON_LAUNCH = -1;
 
-// Catapult
-const float INTAKE_MOTOR_SPEED = 1; // Speed to run intake motor when intaking boulders
-const float LAUNCH_MOTOR_SPEED = 1; // Speed to run the launcher motor when charging
+// Shooting
+const float LAUNCH_MOTOR_SPEED = 1; // Speed to run motor when shooting
 
 // Camera Settings
 const char CAMERA_NAME[] = "cam0\0"; // Found in RoboRio web interface
 const int CAMERA_RES_X = 640;
 const int CAMERA_RES_Y = 480;
 const int CAMERA_FPS = 10;
-const unsigned int CAMERA_EXPOSURE = 0;
 
 // Target Tracking
 const int TARGET_X = 295; // Target x coordinate
