@@ -12,9 +12,6 @@ public:
 	void StopMotors(void);
 
 private:
-	const float LEFT_MOTOR_MULTIPLIER = 1; //Speed multipliers for right and left drive motors
-	const float RIGHT_MOTOR_MULTIPLIER = 1;
-
 	Talon *oFrontLeft, *oFrontRight, *oBackLeft, *oBackRight; //Objects for motors
 };
 
