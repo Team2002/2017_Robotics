@@ -34,12 +34,6 @@
 		<location x="480" y="0"/>
 		<height>80</height>
 	</static-widget>
-	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.MjpgStreamViewerImpl">
-		<location x="4" y="3"/>
-		<width>444</width>
-		<height>333</height>
-		<property name="MJPG Server URL" value="http://roborio-2002-frc.local:1181/?action=stream"/>
-	</static-widget>
 </dashboard>
 <live-window>
 </live-window>
