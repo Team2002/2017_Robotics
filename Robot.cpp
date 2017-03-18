@@ -1,5 +1,6 @@
 #include "Robot.h"
 #include "Config.h"
+#include "GripPipeline.h"
 
 //Constructor
 Robot::Robot(void) {
@@ -43,7 +44,7 @@ void Robot::RobotInit(void) {
 	 }*/
 
 	// Camera settings
-	//cs::UsbCamera USBCamera = CameraServer::GetInstance()->StartAutomaticCapture(0);
+	cs::UsbCamera USBCamera = CameraServer::GetInstance()->StartAutomaticCapture(0);
 	oUSBCamera->SetFPS(CAMERA_FPS);
 	oUSBCamera->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
 }
@@ -176,12 +177,8 @@ void Robot::OperatorControl(void) {
 			//Clear button press I.C.E.
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_STOP_CLIMB))
 				climbButtonPressed = false;
-
 		}
-
-		// Check if the catapult needs to do anything
-		//oCatapult->CheckCatapult();
-
+    
 		// Wait until next cycle (to prevent needless CPU usage)
 		Wait(CYCLE_TIME_DELAY);
 	}
@@ -251,7 +248,6 @@ void Robot::AutoTarget(std::vector<double> &coord, float &center, bool &onTarget
 	else {
 		oDrive->StopMotors();
 	}
-
 }
 
 /*
