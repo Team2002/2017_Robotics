@@ -64,25 +64,30 @@ void Robot::Autonomous(void) {
 	//Load preferences
 	oPrefs = Preferences::GetInstance();
 	int autonomousMode = oPrefs->GetInt("Auto", 0);
-
 	SmartDashboard::PutNumber("Autonomous Error: ", 0.1);
+
+	//Variables
+	std::vector<double> coord;
+	float center = -1;
+	bool onTarget = false;
 	bool failed = false;
+
+	//Move forward
+	oDrive->SetMotors(0, 0);
+	Wait(0);
+
 	switch(autonomousMode) {
 		case 1:		//Left
-			//move forward
-			//turn right
-			//find lift
+			//Turn right
+			oDrive->SetMotors(0, 0);
 			break;
 
 		case 2:		//Middle
-			//move forward
-			//find lift
 			break;
 
 		case 3:		//Right
-			//move forward
-			//turn left
-			//find lift
+			//Turn left
+			oDrive->SetMotors(0, 0);
 			break;
 
 		default:	//Nonsense value
@@ -91,27 +96,42 @@ void Robot::Autonomous(void) {
 			break;
 	}
 	if(!failed) {
-		//line up to lift
-		//put gear on
+		//Find lift
+		while(center < 0) {
+			GetVision(coord, center);
+		}
+		oDrive->StopMotors();
+
+		//Line up to lift
+		int notDone = 2;
+		while(notDone) {
+			GetVision(coord, center);
+			AutoTarget(coord, center, onTarget);
+			if(onTarget)
+				notDone--;
+			else
+				notDone = 2;
+		}
 	}
 }
 
 //Tele-op
 void Robot::OperatorControl(void) {
 	float speedLeft, speedRight,		//Drive motor speeds for manual control
-		center;					//Target for auto aim thing
-	bool reversed = false,			//Keeps track of robot being in reverse mode
+		center;							//Target for auto aim thing
+	bool reversed = false,				//Keeps track of robot being in reverse mode
 		reverseButtonPressed = false,	//Needed for toggling reverse mode
+		launching = false,				//If launch motor should be on
+		launchButtonPressed = false,	//Needed for toggling launch motor
 		climbButtonPressed = false,		//If climbing button has been pressed
-		onTarget = false;		//Whether the robot is going towards the gear
+		onTarget = false;				//Whether the robot is going towards the gear
 	std::vector<double> coord;			//Target coordinates sent from GRIP
 	
 	// Continue updating robot while in tele-op mode
 	while(IsOperatorControl() && IsEnabled()) {
 
-		GetVision(coord, center);
-
 		// Autonomous target tracking
+		GetVision(coord, center);
 		if(oJoystick->GetRawButton(JOYSTICK_BUTTON_TRACK_TARGET))
 			AutoTarget(coord, center, onTarget);
 
@@ -130,7 +150,7 @@ void Robot::OperatorControl(void) {
 				speedLeft = speedRight;
 
 			// Reverse mode toggling
-			ToggleBool(oJoystick->GetRawButton(JOYSTICK_BUTTON_REVERSE), reverseButtonPressed, reversed);
+			ToggleBool(oJoystick->GetRawButton(JOYSTICK_BUTTON_REVERSE), reversed, reverseButtonPressed);
 			if(reversed) {
 				float temp = speedLeft;
 				speedLeft = -speedRight;
@@ -141,7 +161,8 @@ void Robot::OperatorControl(void) {
 			oDrive->SetMotors(speedLeft, speedRight);
 
 			//Fuel
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_LAUNCH))
+			ToggleBool(oJoystick->GetRawButton(JOYSTICK_BUTTON_LAUNCH), launching, launchButtonPressed);
+			if(launching)
 				oFuel->SetLaunchMotor();
 			else
 				oFuel->StopLaunchMotor();
@@ -156,8 +177,6 @@ void Robot::OperatorControl(void) {
 			//Clear button press I.C.E.
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_STOP_CLIMB))
 				climbButtonPressed = false;
-
-
 		}
 
 		// Check if the catapult needs to do anything
@@ -176,6 +195,7 @@ void Robot::GetVision(std::vector<double> &coord, float &center) {
 	coord = oNetworkTable->GetNumberArray("BLOBS", std::vector<double>());
 	SmartDashboard::PutNumber("Empty: ", (double) coord.empty());
 
+	//Make sure RoboRealm returned exactly 2 targets
 	if(coord.size() == 4) {
 		SmartDashboard::PutNumber("Blob1 X: ", coord[0]);
 		SmartDashboard::PutNumber("Blob2 X: ", coord[2]);
@@ -216,13 +236,11 @@ void Robot::AutoTarget(std::vector<double> &coord, float &center, bool &onTarget
 				onTarget = true;
 				oDrive->StopMotors(); // Stop motors
 				Wait(0.5); // Wait for robot to stop moving
-			}
-			if(abs(center - TARGET_X) < (CENTERED_THRESHOLD * CAMERA_RES_X)) {
+			} else if(abs(center - TARGET_X) < (CENTERED_THRESHOLD * CAMERA_RES_X)) {
 				//Put gear on
 				oDrive->SetMotors(speed, speed);
 				if(abs(coord[0] - coord[2]) > STOP_DISTANCE) {
 					oDrive->StopMotors();
-					onTarget = false;
 				}
 			}
 		}
@@ -237,10 +255,10 @@ void Robot::AutoTarget(std::vector<double> &coord, float &center, bool &onTarget
 /*
  This function allows a boolean to be toggled with a joystick button, inside of a while loop that is constantly updating.
  button:        Joystick button for toggling.
- buttonPressed: Boolean for tracking whether the button was pressed in the last cycle. This prevents toggleBool from rapidly switching states while the joystick button is held down.
  toggleBool:    Boolean to be toggled.
+ buttonPressed: Boolean for tracking whether the button was pressed in the last cycle. This prevents toggleBool from rapidly switching states while the joystick button is held down.
  */
-void Robot::ToggleBool(bool button, bool &buttonPressed, bool &toggleBool) {
+void Robot::ToggleBool(bool button, bool &toggleBool, bool &buttonPressed) {
 	if(button && !buttonPressed) {
 		buttonPressed = true;
 		toggleBool = !toggleBool;

@@ -22,8 +22,8 @@ public:
 	void OperatorControl(void);
 
 private:
-	void GetVision(std::vector<double> &, float &);
-	void AutoTarget(std::vector<double> &, float &, bool &);
+	void GetVision(std::vector<double>&, float&);
+	void AutoTarget(std::vector<double>&, float&, bool&);
 	void ToggleBool(bool, bool&, bool&);
 
 	Joystick *oJoystick; //Prepending "o" to avoid naming conflicts ("o" for object)
