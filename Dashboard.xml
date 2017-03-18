@@ -30,10 +30,6 @@
 		<location x="480" y="92"/>
 		<property name="Editable" value="false"/>
 	</widget>
-	<static-widget class="edu.wpi.first.smartdashboard.gui.elements.RobotPreferences">
-		<location x="480" y="0"/>
-		<height>80</height>
-	</static-widget>
 </dashboard>
 <live-window>
 </live-window>
