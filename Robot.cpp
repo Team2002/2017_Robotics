@@ -6,7 +6,7 @@ Robot::Robot(void) {
 	oJoystick = new Joystick(PORT_JOYSTICK);
 	oLED = new LED();
 	oDrive = new Drive();
-	oFuel = new Fuel();
+	oLaunch = new Launch();
 	oLift = new Lift();
 	
 	oPrefs = nullptr;
@@ -20,7 +20,7 @@ Robot::~Robot(void) {
 	delete oJoystick;
 	delete oLED;
 	delete oDrive;
-	delete oFuel;
+	delete oLaunch;
 	delete oLift;
 	
 	delete oUSBCamera;
@@ -159,12 +159,12 @@ void Robot::OperatorControl(void) {
 			// Set drive motors
 			oDrive->SetMotors(speedLeft, speedRight);
 
-			//Fuel
+			//Launch fuel
 			ToggleBool(oJoystick->GetRawButton(JOYSTICK_BUTTON_LAUNCH), launching, launchButtonPressed);
 			if(launching)
-				oFuel->SetLaunchMotor();
+				oLaunch->SetLaunchMotor();
 			else
-				oFuel->StopLaunchMotor();
+				oLaunch->StopLaunchMotor();
 
 			//Lift
 			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_CLIMB)) {

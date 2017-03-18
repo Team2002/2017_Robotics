@@ -2,7 +2,7 @@
 #include "Config.h"
 
 Lift::Lift(void) {
-	oClimbMotor = new Talon(PORT_TALON_LIFT);
+	oClimbMotor = new Talon(PORT_TALON_CLIMB);
 }
 
 Lift::~Lift(void) {
@@ -11,7 +11,7 @@ Lift::~Lift(void) {
 
 //Set motor speed
 void Lift::StartLiftMotor(void) {
-	oClimbMotor->Set(1);
+	oClimbMotor->Set(CLIMB_MOTOR_MULTIPLIER);
 }
 
 //Slow the motor

@@ -7,7 +7,7 @@
 //#include <opencv2/core/core.hpp>
 #include "LED.h"
 #include "Drive.h"
-#include "Fuel.h"
+#include "Launch.h"
 #include "Lift.h"
 
 class Robot: public SampleRobot {
@@ -28,7 +28,7 @@ private:
 	Joystick *oJoystick; //Prepending "o" to avoid naming conflicts ("o" for object)
 	LED *oLED;
 	Drive *oDrive;
-	Fuel *oFuel;
+	Launch *oLaunch;
 	Lift *oLift;
 
 	Preferences *oPrefs;
