@@ -1,43 +1,18 @@
 <head><version>2.83.5</version></head>
-<zoom>11</zoom>
+<zoom>4</zoom>
 <Read_HTTP>
   <erase_on_error>FALSE</erase_on_error>
   <is_active>TRUE</is_active>
   <timeout>1000</timeout>
   <url>http://roborio-2002-frc.local:1181/?action=stream</url>
 </Read_HTTP>
-<Display_Rectangle disabled>
-  <clear_image>0</clear_image>
-  <color_index>green</color_index>
-  <display_as_annotation>1</display_as_annotation>
-  <display_mode_index>0</display_mode_index>
-  <fill_shape>0</fill_shape>
-  <thickness>3</thickness>
-  <xy_list_map/>
-  <x_1>260</x_1>
-  <x_1_map/>
-  <x_2>360</x_2>
-  <x_2_map/>
-  <x_3>360</x_3>
-  <x_3_map/>
-  <x_4>260</x_4>
-  <x_4_map/>
-  <y_1>380</y_1>
-  <y_1_map/>
-  <y_2>380</y_2>
-  <y_2_map/>
-  <y_3>450</y_3>
-  <y_3_map/>
-  <y_4>450</y_4>
-  <y_4_map/>
-</Display_Rectangle>
 <Color_Threshold>
-  <blue_end>220</blue_end>
-  <blue_start>166</blue_start>
+  <blue_end>240</blue_end>
+  <blue_start>210</blue_start>
   <green_end>255</green_end>
-  <green_start>204</green_start>
-  <red_end>168</red_end>
-  <red_start>93</red_start>
+  <green_start>220</green_start>
+  <red_end>240</red_end>
+  <red_start>170</red_start>
 </Color_Threshold>
 <Convex_Hull/>
 <Blob_Filter>
