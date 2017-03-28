@@ -1,5 +1,6 @@
 #include "Robot.h"
 #include "Config.h"
+#include "GripPipeline.h"
 
 //Constructor
 Robot::Robot(void) {
@@ -41,14 +42,13 @@ void Robot::RobotInit(void) {
 	 oLED->ChangeColor(LED::White);
 	 break;
 	 }*/
-CameraServer*test= CameraServer::GetInstance();
+CameraServer *server = CameraServer::GetInstance();
 	// Camera settings
 	oUSBCamera->SetFPS(CAMERA_FPS);
 	oUSBCamera->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
 	oUSBCamera->SetBrightness(50);
 	oUSBCamera->SetExposureManual(0);
-	test->StartAutomaticCapture(*oUSBCamera);
-
+	server->StartAutomaticCapture(*oUSBCamera);
 }
 
 // Use Test mode to charge the catapult
@@ -65,19 +65,19 @@ void Robot::Test(void) {
 void Robot::Autonomous(void) {
 	//Load preferences
 	oPrefs = Preferences::GetInstance();
-	//int autonomousMode = oPrefs->GetInt("Auto", 0);
+	int autonomousMode = oPrefs->GetInt("Auto", 0);
 	SmartDashboard::PutNumber("Autonomous Error: ", 0.1);
 
 	//Variables
 	std::vector<double> coord;
-	//float center = -1;
-	//bool onTarget = false,
-	//	 failed = false;
+	float center = -1;
+	bool onTarget = false,
+	  	 failed = false;
 
 	//Move forward
 	oDrive->SetMotors(1, 1);
 	Wait(2.5);
-	/*
+	
 	 switch(autonomousMode) {
 	 case 1:		//Left
 	 //Turn right
@@ -114,7 +114,7 @@ void Robot::Autonomous(void) {
 	 else
 	 notDone = 2;
 	 }
-	 }*/oDrive->StopMotors();
+	 }oDrive->StopMotors();
 }
 
 //Tele-op
@@ -252,7 +252,6 @@ void Robot::AutoTarget(std::vector<double> &coord, float &center, bool &onTarget
 	else {
 		oDrive->StopMotors();
 	}
-
 }
 
 /*

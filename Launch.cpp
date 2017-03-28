@@ -15,7 +15,6 @@ void Launch::SetLaunchMotor(void) {
 		oLaunchMotor->Set(-LAUNCH_MOTOR_MULTIPLIER);
 	else
 		oLaunchMotor->Set(LAUNCH_MOTOR_MULTIPLIER);
-
 }
 
 //Stop the motors
