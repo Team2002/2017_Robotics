@@ -11,12 +11,21 @@ Lift::~Lift(void) {
 
 //Set motor speed
 void Lift::StartLiftMotor(void) {
-	oClimbMotor->Set(CLIMB_MOTOR_MULTIPLIER);
+	if(CLIMB_MOTOR_REVERSED)
+		oClimbMotor->Set(-CLIMB_MOTOR_MULTIPLIER);
+	else
+		oClimbMotor->Set(CLIMB_MOTOR_MULTIPLIER);
 }
 
 //Slow the motor
 void Lift::SlowLiftMotor(void) {
-	oClimbMotor->Set(.5);
-	Wait(1);
-	oClimbMotor->Set(.25);
+	if(CLIMB_MOTOR_REVERSED)
+		oClimbMotor->Set(-.5 * CLIMB_MOTOR_MULTIPLIER);
+	else
+		oClimbMotor->Set(.5 * CLIMB_MOTOR_MULTIPLIER);
+
+}
+
+void Lift::StopLiftMotor(void) {
+	oClimbMotor->Set(0);
 }

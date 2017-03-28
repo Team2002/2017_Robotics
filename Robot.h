@@ -34,7 +34,7 @@ private:
 	Preferences *oPrefs;
 
 	//For vision tracking
-	cs::UsbCamera *oUSBCamera;
+	cs::VideoCamera *oUSBCamera;
 	//cv::VideoCapture *oCamera;
 	//Image *oImage;
 	std::shared_ptr<NetworkTable> oNetworkTable;

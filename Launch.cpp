@@ -11,7 +11,11 @@ Launch::~Launch(void) {
 
 //Set motor speed
 void Launch::SetLaunchMotor(void) {
-	oLaunchMotor->Set(LAUNCH_MOTOR_MULTIPLIER);
+	if(LAUNCH_MOTOR_REVERSED)
+		oLaunchMotor->Set(-LAUNCH_MOTOR_MULTIPLIER);
+	else
+		oLaunchMotor->Set(LAUNCH_MOTOR_MULTIPLIER);
+
 }
 
 //Stop the motors

@@ -10,6 +10,7 @@ public:
 
 	void StartLiftMotor(void);
 	void SlowLiftMotor(void);
+	void StopLiftMotor(void);
 
 private:
 	Talon *oClimbMotor; //Object for motor

@@ -5,12 +5,12 @@
 const int PORT_JOYSTICK = 0; // Joystick
 
 // PWM Ports
-const int PORT_TALON_DRIVE_FRONTLEFT = 2; // Talons (Motor Controllers)
-const int PORT_TALON_DRIVE_FRONTRIGHT = 14;
-const int PORT_TALON_DRIVE_BACKLEFT = 12;
-const int PORT_TALON_DRIVE_BACKRIGHT = 13;
-const int PORT_TALON_LAUNCH = 11;
-const int PORT_TALON_CLIMB = 16;
+const int PORT_TALON_DRIVE_FRONTLEFT = 0; // Talons (Motor Controllers)
+const int PORT_TALON_DRIVE_FRONTRIGHT = 3;
+const int PORT_TALON_DRIVE_BACKLEFT = 1;
+const int PORT_TALON_DRIVE_BACKRIGHT = 4;
+const int PORT_TALON_LAUNCH = 2;
+const int PORT_TALON_CLIMB = 5;
 
 // Relay Ports
 const int PORT_RELAY_RED = 0; // Spike H-Bridge Relays (for LEDs)
@@ -23,7 +23,7 @@ const bool DRIVE_MOTOR_FRONTRIGHT_REVERSED = true;
 const bool DRIVE_MOTOR_BACKLEFT_REVERSED = false;
 const bool DRIVE_MOTOR_BACKRIGHT_REVERSED = true;
 
-const bool LAUNCH_MOTOR_REVERSED = true; // Launch
+const bool LAUNCH_MOTOR_REVERSED = false; // Launch
 const bool CLIMB_MOTOR_REVERSED = true; // Climb
 
 // Motor Speed
@@ -36,12 +36,12 @@ const float LAUNCH_MOTOR_MULTIPLIER = 1;
 const int JOYSTICK_AXIS_LEFT = 1; // Axes
 const int JOYSTICK_AXIS_RIGHT = 3;
 
-const int JOYSTICK_BUTTON_REVERSE = -1; // Buttons
-const int JOYSTICK_BUTTON_LOCK_TURNING = -1;
-const int JOYSTICK_BUTTON_TRACK_TARGET = -1;
+const int JOYSTICK_BUTTON_REVERSE = 4; // Buttons
+const int JOYSTICK_BUTTON_LOCK_TURNING = 7;
+const int JOYSTICK_BUTTON_TRACK_TARGET = 0;
 const int JOYSTICK_BUTTON_LAUNCH = -1;
-const int JOYSTICK_BUTTON_CLIMB = -1;
-const int JOYSTICK_BUTTON_STOP_CLIMB = -1;
+const int JOYSTICK_BUTTON_CLIMB = -2;
+const int JOYSTICK_BUTTON_STOP_CLIMB = -3;
 
 // Camera Settings
 const char CAMERA_NAME[] = "cam0\0"; // Found in RoboRio web interface
@@ -51,8 +51,7 @@ const int CAMERA_FPS = 10;
 
 // Target Tracking
 const int TARGET_X = 295; // Target x coordinate
-const int TARGET_Y = 420; // Target y coordinate
-const float CENTERED_THRESHOLD = 0.04; // Threshold for considering the target centered (CENTERED_THRESHOLD * RES_X/RES_Y = pixels target can be off)
+const float CENTERED_THRESHOLD = 0.04; // Threshold for considering the target centered (CENTERED_THRESHOLD * RES_X = pixels target can be off)
 const int STOP_DISTANCE = 100; //Distance between targets when at lift
 const float VOLTAGE_1 = 11; // Two points for creating the line that calculates what the motor speed should be during tracking based on battery voltage
 const float SPEED_1 = 0.5;
