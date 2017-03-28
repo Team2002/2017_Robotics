@@ -1,7 +1,7 @@
 <head><version>2.83.5</version></head>
-<zoom>4</zoom>
+<zoom>12</zoom>
 <Read_HTTP>
-  <erase_on_error>FALSE</erase_on_error>
+  <erase_on_error>TRUE</erase_on_error>
   <is_active>TRUE</is_active>
   <timeout>1000</timeout>
   <url>http://roborio-2002-frc.local:1181/?action=stream</url>
@@ -11,21 +11,8 @@
   <blue_start>210</blue_start>
   <green_end>255</green_end>
   <green_start>220</green_start>
-  <red_end>240</red_end>
+  <red_end>230</red_end>
   <red_start>170</red_start>
-=======
-<Display_Rectangle disabled>
-  <clear_image>0</clear_image>
-  <color_index>green</color_index>
-  <display_as_annotation>1</display_as_annotation>
-  <display_mode_index>0</display_mode_index>
-  <fill_shape>0</fill_shape>
-  <thickness>3</thickness>
-  <xy_list_map/>
-  <x_1>260</x_1>
-  <x_1_map/>
-  <x_2>360</x_2>
-
 </Color_Threshold>
 <Convex_Hull/>
 <Blob_Filter>

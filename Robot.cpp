@@ -42,11 +42,13 @@ void Robot::RobotInit(void) {
 	 oLED->ChangeColor(LED::White);
 	 break;
 	 }*/
-
+CameraServer *server = CameraServer::GetInstance();
 	// Camera settings
-	cs::UsbCamera USBCamera = CameraServer::GetInstance()->StartAutomaticCapture(0);
 	oUSBCamera->SetFPS(CAMERA_FPS);
 	oUSBCamera->SetResolution(CAMERA_RES_X, CAMERA_RES_Y);
+	oUSBCamera->SetBrightness(50);
+	oUSBCamera->SetExposureManual(0);
+	server->StartAutomaticCapture(*oUSBCamera);
 }
 
 // Use Test mode to charge the catapult
@@ -69,62 +71,62 @@ void Robot::Autonomous(void) {
 	//Variables
 	std::vector<double> coord;
 	float center = -1;
-	bool onTarget = false;
-	bool failed = false;
+	bool onTarget = false,
+	  	 failed = false;
 
 	//Move forward
-	oDrive->SetMotors(0, 0);
-	Wait(0);
+	oDrive->SetMotors(1, 1);
+	Wait(2.5);
+	
+	 switch(autonomousMode) {
+	 case 1:		//Left
+	 //Turn right
+	 oDrive->SetMotors(.25, 0);
+	 break;
 
-	switch(autonomousMode) {
-		case 1:		//Left
-			//Turn right
-			oDrive->SetMotors(0, 0);
-			break;
+	 case 2:		//Middle
+	 break;
 
-		case 2:		//Middle
-			break;
+	 case 3:		//Right
+	 //Turn left
+	 oDrive->SetMotors(0, .25);
+	 break;
 
-		case 3:		//Right
-			//Turn left
-			oDrive->SetMotors(0, 0);
-			break;
+	 default:	//Nonsense value
+	 SmartDashboard::PutNumber("Autonomous Error: ", autonomousMode);
+	 failed = true;
+	 break;
+	 }
+	 if(!failed) {
+	 //Find lift
+	 while(center < 0 && IsAutonomous()) {
+	 GetVision(coord, center);
+	 }
+	 oDrive->StopMotors();
 
-		default:	//Nonsense value
-			SmartDashboard::PutNumber("Autonomous Error: ", autonomousMode);
-			failed = true;
-			break;
-	}
-	if(!failed) {
-		//Find lift
-		while(center < 0) {
-			GetVision(coord, center);
-		}
-		oDrive->StopMotors();
-
-		//Line up to lift
-		int notDone = 2;
-		while(notDone) {
-			GetVision(coord, center);
-			AutoTarget(coord, center, onTarget);
-			if(onTarget)
-				notDone--;
-			else
-				notDone = 2;
-		}
-	}
+	 //Line up to lift
+	 int notDone = 2;
+	 while(notDone && IsAutonomous()) {
+	 GetVision(coord, center);
+	 AutoTarget(coord, center, onTarget);
+	 if(onTarget)
+	 notDone--;
+	 else
+	 notDone = 2;
+	 }
+	 }oDrive->StopMotors();
 }
 
 //Tele-op
 void Robot::OperatorControl(void) {
 	float speedLeft, speedRight,		//Drive motor speeds for manual control
 		center;							//Target for auto aim thing
-	bool reversed = false,				//Keeps track of robot being in reverse mode
+	bool reversed = false,			//Keeps track of robot being in reverse mode
 		reverseButtonPressed = false,	//Needed for toggling reverse mode
 		launching = false,				//If launch motor should be on
 		launchButtonPressed = false,	//Needed for toggling launch motor
 		climbButtonPressed = false,		//If climbing button has been pressed
-		onTarget = false;				//Whether the robot is going towards the gear
+		onTarget = false;		//Whether the robot is going towards the gear
 	std::vector<double> coord;			//Target coordinates sent from GRIP
 	
 	// Continue updating robot while in tele-op mode
@@ -174,11 +176,13 @@ void Robot::OperatorControl(void) {
 			} else if(climbButtonPressed)
 				oLift->SlowLiftMotor();
 
-			//Clear button press I.C.E.
-			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_STOP_CLIMB))
+			//Stop lift
+			if(oJoystick->GetRawButton(JOYSTICK_BUTTON_STOP_CLIMB)) {
 				climbButtonPressed = false;
+				oLift->StopLiftMotor();
+			}
 		}
-    
+
 		// Wait until next cycle (to prevent needless CPU usage)
 		Wait(CYCLE_TIME_DELAY);
 	}

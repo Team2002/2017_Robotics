@@ -21,7 +21,9 @@ Drive::~Drive(void) {
 void Drive::SetMotors(float left, float right) {
 	left *= LEFT_MOTOR_MULTIPLIER;
 	right *= RIGHT_MOTOR_MULTIPLIER;
-	
+	SmartDashboard::PutNumber("Left: ", left);
+	SmartDashboard::PutNumber("Right: ", right);
+
 	if(DRIVE_MOTOR_FRONTLEFT_REVERSED)
 		oFrontLeft->Set(-left);
 	else
@@ -45,8 +47,8 @@ void Drive::SetMotors(float left, float right) {
 
 //Stop the motors
 void Drive::StopMotors(void) {
-	oFrontLeft->Set(0);
-	oFrontRight->Set(0);
-	oBackLeft->Set(0);
-	oBackRight->Set(0);
+	oFrontLeft->StopMotor();
+	oFrontRight->StopMotor();
+	oBackLeft->StopMotor();
+	oBackRight->StopMotor();
 }
