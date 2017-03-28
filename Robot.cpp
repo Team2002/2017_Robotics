@@ -1,6 +1,5 @@
 #include "Robot.h"
 #include "Config.h"
-#include "GripPipeline.h"
 
 //Constructor
 Robot::Robot(void) {
